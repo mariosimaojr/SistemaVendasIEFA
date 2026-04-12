@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>
+
+    {{ titulo }}
+
+</h2>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <div class="mb-3">
+
+        <label class="form-label">
+
+            Login
+
+        </label>
+
+        {{ form.login_acesso }}
+
+    </div>
+
+    <div class="mb-3">
+
+        <label class="form-label">
+
+            Email
+
+        </label>
+
+        {{ form.email }}
+
+    </div>
+
+    <div class="mb-3">
+
+        <label class="form-label">
+
+            Senha
+
+        </label>
+
+        {{ form.senha }}
+
+    </div>
+
+    <div class="mb-3">
+
+        <label class="form-label">
+
+            Confirmar Senha
+
+        </label>
+
+        {{ form.confirmar_senha }}
+
+    </div>
+
+    <div class="mb-3">
+
+        <label class="form-label">
+
+            Perfil
+
+        </label>
+
+        {{ form.perfil }}
+
+    </div>
+
+    <div class="form-check mb-3">
+
+        {{ form.ativo }}
+
+        <label class="form-check-label">
+
+            Ativo
+
+        </label>
+
+    </div>
+
+    <button type="submit"
+            class="btn btn-success">
+
+        Salvar
+
+    </button>
+
+    <a href="{% url 'usuarios:lista' %}"
+       class="btn btn-secondary">
+
+        Cancelar
+
+    </a>
+
+</form>
+
+{% endblock %}

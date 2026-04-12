@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Categorias</h2>
+
+<p>
+
+    <a href="{% url 'categorias:nova' %}">
+        Nova Categoria
+    </a>
+
+</p>
+
+<table class="table table-striped" border="1">
+
+    <thead>
+
+        <tr>
+
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Ativo</th>
+            <th>Ações</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for categoria in categorias %}
+
+        <tr>
+
+            <td>
+
+                {{ categoria.sequencia }}
+
+            </td>
+
+            <td>
+
+                {{ categoria.nome }}
+
+            </td>
+
+            <td>
+
+                {{ categoria.descricao }}
+
+            </td>
+
+            <td>
+
+                {{ categoria.ativo }}
+
+            </td>
+
+            <td>
+
+                <a href="{% url 'categorias:editar' categoria.sequencia %}">
+                    Editar
+                </a>
+
+                |
+
+                <a href="{% url 'categorias:excluir' categoria.sequencia %}"
+                   onclick="return confirm('Confirma a exclusão da categoria?');">
+
+                    Excluir
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+
+            <td colspan="5">
+
+                Nenhuma categoria cadastrada.
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>
+
+    {{ titulo }}
+
+</h2>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <div class="mb-3">
+
+        <label class="form-label">
+
+            Código
+
+        </label>
+
+        {{ form.sequencia }}
+
+    </div>
+
+    <div class="mb-3">
+
+        <label class="form-label">
+
+            Descrição
+
+        </label>
+
+        {{ form.descricao }}
+
+    </div>
+
+    <div class="form-check mb-3">
+
+        {{ form.ativo }}
+
+        <label class="form-check-label">
+
+            Ativo
+
+        </label>
+
+    </div>
+
+    <button type="submit"
+
+            class="btn btn-success">
+
+        Salvar
+
+    </button>
+
+    <a href="{% url 'formaspagamento:lista' %}"
+
+       class="btn btn-secondary">
+
+        Cancelar
+
+    </a>
+
+</form>
+
+{% endblock %}

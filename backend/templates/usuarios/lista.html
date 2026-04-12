@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>
+
+    Usuários
+
+</h2>
+
+<a href="{% url 'usuarios:novo' %}"
+   class="btn btn-primary mb-3">
+
+    Novo Usuário
+
+</a>
+
+<table class="table table-striped" border="1">
+
+    <thead>
+
+        <tr>
+
+            <th>Login</th>
+
+            <th>Email</th>
+
+            <th>Perfil</th>
+
+            <th>Ativo</th>
+
+            <th>Ações</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for usuario in usuarios %}
+
+        <tr>
+
+            <td>
+
+                {{ usuario.login_acesso }}
+
+            </td>
+
+            <td>
+
+                {{ usuario.email }}
+
+            </td>
+
+            <td>
+
+                {{ usuario.perfil }}
+
+            </td>
+
+            <td>
+
+                {% if usuario.ativo %}
+
+                    Sim
+
+                {% else %}
+
+                    Não
+
+                {% endif %}
+
+            </td>
+
+            <td>
+
+                <a href="{% url 'usuarios:editar' usuario.sequencia %}"
+                   class="btn btn-warning btn-sm">
+
+                    Editar
+
+                </a>
+
+                <a href="{% url 'usuarios:excluir' usuario.sequencia %}"
+                   class="btn btn-danger btn-sm">
+
+                    Excluir
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+
+            <td colspan="5">
+
+                Nenhum usuário cadastrado.
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

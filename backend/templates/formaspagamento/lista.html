@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>
+
+    Formas de Pagamento
+
+</h2>
+
+<a href="{% url 'formaspagamento:novo' %}"
+
+   class="btn btn-primary mb-3">
+
+    Nova Forma de Pagamento
+
+</a>
+
+<table class="table table-striped" border="1">
+
+    <thead>
+
+        <tr>
+
+            <th>Código</th>
+
+            <th>Descrição</th>
+
+            <th>Ativo</th>
+
+            <th>Ações</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for forma in formas %}
+
+        <tr>
+
+            <td>
+
+                {{ forma.sequencia }}
+
+            </td>
+
+            <td>
+
+                {{ forma.descricao }}
+
+            </td>
+
+            <td>
+
+                {% if forma.ativo %}
+
+                    Sim
+
+                {% else %}
+
+                    Não
+
+                {% endif %}
+
+            </td>
+
+            <td>
+
+                <a href="{% url 'formaspagamento:editar' forma.sequencia %}"
+
+                   class="btn btn-warning btn-sm">
+
+                    Editar
+
+                </a>
+
+                <a href="{% url 'formaspagamento:excluir' forma.sequencia %}"
+
+                   class="btn btn-danger btn-sm">
+
+                    Excluir
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+
+            <td colspan="4">
+
+                Nenhuma forma de pagamento cadastrada.
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}
