@@ -4,111 +4,12 @@
 
 <h1>CEFA IEFA</h1>
 
-<hr>
+<h2>Painel Principal</h2>
 
-<table width="100%">
-
-<tr>
-
-<td width="200" valign="top">
-
-    <h3>Menu</h3>
-
-    <p>
-        <a href="#">Vendas</a>
-    </p>
-
-    <p>
-        <a href="{% url 'categorias:lista' %}">
-            Categorias
-        </a>
-    </p>
-
-    <p>
-        <a href="{% url 'formaspagamento:lista' %}">
-            Forma de Pagamento
-        </a>
-    </p>
-
-    <p>
-        <a href="#">Produtos</a>
-    </p>
-
-    <p>
-        <a href="#">Relatórios</a>
-    </p>
-
-    <p>
-        <a href="{% url 'usuarios:lista' %}">
-            Usuários
-        </a>
-    </p>
-
-</td>
-
-<td valign="top">
-
-    <h2>Painel Principal</h2>
-
-    <br>
-
-    <table>
-
-        <tr>
-
-            <td>
-
-                <a href="#">
-                    <button
-                        style="
-                            width:200px;
-                            height:100px;
-                            font-size:24px;
-                        ">
-                        VENDAS
-                    </button>
-                </a>
-
-            </td>
-
-            <td>
-
-                <a href="#">
-                    <button
-                        style="
-                            width:200px;
-                            height:100px;
-                            font-size:24px;
-                        ">
-                        PRODUTOS
-                    </button>
-                </a>
-
-            </td>
-
-            <td>
-
-                <a href="#">
-                    <button
-                        style="
-                            width:200px;
-                            height:100px;
-                            font-size:24px;
-                        ">
-                        ESTOQUE
-                    </button>
-                </a>
-
-            </td>
-
-        </tr>
-
-    </table>
-
-</td>
-
-</tr>
-
-</table>
+<div class="dashboard-cards">
+    <a href="#" class="dashboard-card card-vendas">VENDAS</a>
+    <a href="#" class="dashboard-card card-produtos">PRODUTOS</a>
+    <a href="#" class="dashboard-card card-estoque">ESTOQUE</a>
+</div>
 
 {% endblock %}

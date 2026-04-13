@@ -4,18 +4,34 @@ from .models import Usuario
 
 class UsuarioForm(forms.ModelForm):
 
+    PERFIL_CHOICES = [
+        ('Administrador', 'Administrador'),
+        ('Gerente', 'Gerente'),
+        ('Usuário', 'Usuário'),
+    ]
+
+    perfil = forms.ChoiceField(
+        label='Perfil',
+        choices=PERFIL_CHOICES,
+        widget=forms.Select(
+            attrs={'class': 'form-control'}
+        )
+    )
+
     senha = forms.CharField(
         label='Senha',
         widget=forms.PasswordInput(
             attrs={'class': 'form-control'}
-        )
+        ),
+        required=False
     )
 
     confirmar_senha = forms.CharField(
         label='Confirmar Senha',
         widget=forms.PasswordInput(
             attrs={'class': 'form-control'}
-        )
+        ),
+        required=False
     )
 
     class Meta:
@@ -23,12 +39,10 @@ class UsuarioForm(forms.ModelForm):
         model = Usuario
 
         fields = [
-
             'login_acesso',
             'email',
             'perfil',
             'ativo',
-
         ]
 
         widgets = {
@@ -41,15 +55,19 @@ class UsuarioForm(forms.ModelForm):
                 attrs={'class': 'form-control'}
             ),
 
-            'perfil': forms.TextInput(
-                attrs={'class': 'form-control'}
-            ),
-
             'ativo': forms.CheckboxInput(
                 attrs={'class': 'form-check-input'}
             ),
 
         }
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        if not self.instance or not self.instance.pk:
+            self.fields['senha'].required = True
+            self.fields['confirmar_senha'].required = True
 
     def clean(self):
 
@@ -58,10 +76,16 @@ class UsuarioForm(forms.ModelForm):
         senha = cleaned_data.get('senha')
         confirmar = cleaned_data.get('confirmar_senha')
 
-        if senha != confirmar:
-
-            raise forms.ValidationError(
-                'As senhas não conferem.'
-            )
+        if self.instance and self.instance.pk:
+            if senha or confirmar:
+                if senha != confirmar:
+                    raise forms.ValidationError(
+                        'As senhas não conferem.'
+                    )
+        else:
+            if senha != confirmar:
+                raise forms.ValidationError(
+                    'As senhas não conferem.'
+                )
 
         return cleaned_data

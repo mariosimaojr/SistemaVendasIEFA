@@ -52,10 +52,7 @@ def criar(request):
 
         {
 
-            'form': form,
-
-            'titulo': 'Nova Forma de Pagamento'
-
+            'form': form
         }
 
     )
@@ -103,10 +100,7 @@ def editar(request, pk):
 
         {
 
-            'form': form,
-
-            'titulo': 'Editar Forma de Pagamento'
-
+            'form': form
         }
 
     )

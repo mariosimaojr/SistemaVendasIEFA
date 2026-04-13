@@ -62,8 +62,7 @@ def criar(request):
 
         {
 
-            'form': form,
-            'titulo': 'Novo Usuário'
+            'form': form
 
         }
 
@@ -112,9 +111,7 @@ def editar(request, pk):
 
         {
 
-            'form': form,
-
-            'titulo': 'Editar Usuário'
+            'form': form
 
         }
 

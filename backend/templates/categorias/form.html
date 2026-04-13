@@ -2,20 +2,34 @@
 
 {% block content %}
 
-<h2>Nova Categoria</h2>
+<h2>
+    {% if form.instance.pk %}
+        Editar Categoria
+    {% else %}
+        Nova Categoria
+    {% endif %}
+</h2>
 
 <form method="post">
+    {% csrf_token %}
 
-{% csrf_token %}
+    <p>
+        Nome:<br>
+        {{ form.nome }}
+    </p>
 
-{{ form.as_p }}
+    <p>
+        Descrição:<br>
+        {{ form.descricao }}
+    </p>
 
-<button type="submit">
+    <p>
+        Ativo:
+        {{ form.ativo }}
+    </p>
 
-Salvar
-
-</button>
-
+    <button type="submit" class="btn-save">Salvar</button>
+    <a href="{% url 'categorias:lista' %}" class="btn-cancel">Cancelar</a>
 </form>
 
 {% endblock %}

@@ -3,66 +3,30 @@
 {% block content %}
 
 <h2>
-
-    {{ titulo }}
-
+    {% if form.instance.pk %}
+        Editar Forma de Pagamento
+    {% else %}
+        Nova Forma de Pagamento
+    {% endif %}
 </h2>
 
 <form method="post">
 
     {% csrf_token %}
 
-    <div class="mb-3">
-
-        <label class="form-label">
-
-            Código
-
-        </label>
-
-        {{ form.sequencia }}
-
-    </div>
-
-    <div class="mb-3">
-
-        <label class="form-label">
-
-            Descrição
-
-        </label>
-
+    <p>
+        Descrição:<br>
         {{ form.descricao }}
+    </p>
 
-    </div>
-
-    <div class="form-check mb-3">
-
+    <p>
+        Ativo:
         {{ form.ativo }}
+    </p>
 
-        <label class="form-check-label">
+    <button type="submit" class="btn-save">Salvar</button>
 
-            Ativo
-
-        </label>
-
-    </div>
-
-    <button type="submit"
-
-            class="btn btn-success">
-
-        Salvar
-
-    </button>
-
-    <a href="{% url 'formaspagamento:lista' %}"
-
-       class="btn btn-secondary">
-
-        Cancelar
-
-    </a>
+    <a href="{% url 'formaspagamento:lista' %}" class="btn-cancel">Cancelar</a>
 
 </form>
 

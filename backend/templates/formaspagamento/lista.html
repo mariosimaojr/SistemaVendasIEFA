@@ -2,108 +2,42 @@
 
 {% block content %}
 
-<h2>
+<h2>Formas de Pagamento</h2>
 
-    Formas de Pagamento
-
-</h2>
-
-<a href="{% url 'formaspagamento:novo' %}"
-
-   class="btn btn-primary mb-3">
-
+<a href="{% url 'formaspagamento:novo' %}" class="btn-link">
     Nova Forma de Pagamento
-
 </a>
 
-<table class="table table-striped" border="1">
-
+<table>
     <thead>
-
         <tr>
-
             <th>Código</th>
-
             <th>Descrição</th>
-
             <th>Ativo</th>
-
             <th>Ações</th>
-
         </tr>
-
     </thead>
-
     <tbody>
-
         {% for forma in formas %}
-
         <tr>
-
+            <td>{{ forma.sequencia }}</td>
+            <td>{{ forma.descricao }}</td>
+            <td>{% if forma.ativo %}Sim{% else %}Não{% endif %}</td>
             <td>
-
-                {{ forma.sequencia }}
-
-            </td>
-
-            <td>
-
-                {{ forma.descricao }}
-
-            </td>
-
-            <td>
-
-                {% if forma.ativo %}
-
-                    Sim
-
-                {% else %}
-
-                    Não
-
-                {% endif %}
-
-            </td>
-
-            <td>
-
-                <a href="{% url 'formaspagamento:editar' forma.sequencia %}"
-
-                   class="btn btn-warning btn-sm">
-
+                <a href="{% url 'formaspagamento:editar' forma.sequencia %}" class="btn-action btn-edit">
                     Editar
-
                 </a>
-
-                <a href="{% url 'formaspagamento:excluir' forma.sequencia %}"
-
-                   class="btn btn-danger btn-sm">
-
+                <a href="{% url 'formaspagamento:excluir' forma.sequencia %}" class="btn-action btn-delete">
                     Excluir
-
                 </a>
-
             </td>
-
         </tr>
-
         {% empty %}
-
         <tr>
-
-            <td colspan="4">
-
-                Nenhuma forma de pagamento cadastrada.
-
-            </td>
-
+            <td colspan="4">Nenhuma forma de pagamento cadastrada.</td>
         </tr>
-
         {% endfor %}
-
     </tbody>
-
 </table>
 
 {% endblock %}
