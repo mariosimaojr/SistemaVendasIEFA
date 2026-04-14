@@ -43,4 +43,8 @@ urlpatterns = [
         include('apps.usuarios.urls')
     ),
 
+    path(
+        'produtos/',
+        include('apps.produtos.urls')
+  ),
 ]

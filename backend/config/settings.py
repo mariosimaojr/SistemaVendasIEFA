@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'apps.categorias',
     'apps.formaspagamento',
     'apps.usuarios',
-    
+    'apps.produtos',
+
 ]
 
 MIDDLEWARE = [

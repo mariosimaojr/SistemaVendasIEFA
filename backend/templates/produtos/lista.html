@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Produtos</h2>
+
+<a href="{% url 'produtos:novo' %}" class="btn-link">
+    Novo Produto
+</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Preço de Venda</th>
+            <th>Ativo</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for produto in produtos %}
+        <tr>
+            <td>{{ produto.sequencia }}</td>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.categoria.nome }}</td>
+            <td>R$ {{ produto.preco_venda }}</td>
+            <td>
+                {% if produto.ativo %}Sim{% else %}Não{% endif %}
+            </td>
+            <td>
+                <a href="{% url 'produtos:editar' produto.sequencia %}" class="btn-action btn-edit">
+                    Editar
+                </a>
+                <a href="{% url 'produtos:excluir' produto.sequencia %}"
+                   class="btn-action btn-delete"
+                   onclick="return confirm('Confirma a exclusão do produto?');">
+                    Excluir
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Nenhum produto cadastrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>{{ titulo }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <p>
+        Nome:<br>
+        {{ form.nome }}
+    </p>
+
+    <p>
+        Descrição:<br>
+        {{ form.descricao }}
+    </p>
+
+    <p>
+        Categoria:<br>
+        {{ form.categoria }}
+    </p>
+
+    <p>
+        Preço de Venda:<br>
+        {{ form.preco_venda }}
+    </p>
+
+    <p>
+        Ativo:
+        {{ form.ativo }}
+    </p>
+
+    <button type="submit" class="btn-save">Salvar</button>
+    <a href="{% url 'produtos:lista' %}" class="btn-cancel">Cancelar</a>
+</form>
+
+{% endblock %}
