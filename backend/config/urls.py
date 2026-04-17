@@ -46,5 +46,11 @@ urlpatterns = [
     path(
         'produtos/',
         include('apps.produtos.urls')
-  ),
+    ),
+
+    path(
+        'movimentacoes-estoque/',
+        include('apps.movimentacoes_estoque.urls')
+    ),
+
 ]

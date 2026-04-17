@@ -9,7 +9,7 @@
 <div class="dashboard-cards">
     <a href="#" class="dashboard-card card-vendas">VENDAS</a>
     <a href="{% url 'produtos:lista' %}" class="dashboard-card card-produtos">PRODUTOS</a>
-    <a href="#" class="dashboard-card card-estoque">ESTOQUE</a>
+    <a href="{% url 'movimentacoes_estoque:lista' %}" class="dashboard-card card-estoque">ESTOQUE</a>
 </div>
 
 {% endblock %}

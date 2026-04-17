@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>{{ titulo }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div style="color: red; margin-bottom: 15px;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <p>
+        Produto:<br>
+        {{ form.produto }}
+        {% if form.produto.errors %}
+            <br><span style="color:red;">{{ form.produto.errors }}</span>
+        {% endif %}
+    </p>
+
+    <p>
+        Quantidade:<br>
+        {{ form.quantidade }}
+        {% if form.quantidade.errors %}
+            <br><span style="color:red;">{{ form.quantidade.errors }}</span>
+        {% endif %}
+    </p>
+
+    <p>
+        Data do Movimento:<br>
+        {{ form.data_movimento }}
+        {% if form.data_movimento.errors %}
+            <br><span style="color:red;">{{ form.data_movimento.errors }}</span>
+        {% endif %}
+    </p>
+
+    <p>
+        Observação:<br>
+        {{ form.observacao }}
+        {% if form.observacao.errors %}
+            <br><span style="color:red;">{{ form.observacao.errors }}</span>
+        {% endif %}
+    </p>
+
+    <p>
+        Usuário:<br>
+        {{ form.usuario }}
+        {% if form.usuario.errors %}
+            <br><span style="color:red;">{{ form.usuario.errors }}</span>
+        {% endif %}
+    </p>
+
+    <p>
+        Tipo de Movimento:<br>
+        {{ form.tipo_movimento }}
+        {% if form.tipo_movimento.errors %}
+            <br><span style="color:red;">{{ form.tipo_movimento.errors }}</span>
+        {% endif %}
+    </p>
+
+    <button type="submit" class="btn-save">Salvar</button>
+    <a href="{% url 'movimentacoes_estoque:lista' %}" class="btn-cancel">Cancelar</a>
+</form>
+
+{% endblock %}

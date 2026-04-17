@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Excluir Movimentação de Estoque</h2>
+
+<p>
+    Deseja realmente excluir esta movimentação?
+</p>
+
+<ul>
+    <li><strong>Produto:</strong> {{ movimentacao.produto.nome }}</li>
+    <li><strong>Quantidade:</strong> {{ movimentacao.quantidade }}</li>
+    <li><strong>Tipo:</strong> {{ movimentacao.get_tipo_movimento_display }}</li>
+    <li><strong>Usuário:</strong> {{ movimentacao.usuario.login_acesso }}</li>
+</ul>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn-save">Confirmar</button>
+    <a href="{% url 'movimentacoes_estoque:lista' %}" class="btn-cancel">Cancelar</a>
+</form>
+
+{% endblock %}

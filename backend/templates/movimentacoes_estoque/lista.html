@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Movimentações de Estoque</h2>
+
+<a href="{% url 'movimentacoes_estoque:novo' %}" class="btn-link">
+    Nova Movimentação
+</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Data</th>
+            <th>Usuário</th>
+            <th>Tipo</th>
+            <th>Observação</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for movimentacao in movimentacoes %}
+        <tr>
+            <td>{{ movimentacao.sequencia }}</td>
+            <td>{{ movimentacao.produto.nome }}</td>
+
+            <td>
+                {% if movimentacao.tipo_movimento == 'ENTRADA' %}
+                    <span style="color: green; font-weight: bold;">
+                        +{{ movimentacao.quantidade }}
+                    </span>
+                {% else %}
+                    <span style="color: red; font-weight: bold;">
+                        {{ movimentacao.quantidade }}
+                    </span>
+                {% endif %}
+            </td>
+
+            <td>{{ movimentacao.data_movimento }}</td>
+            <td>{{ movimentacao.usuario.login_acesso }}</td>
+
+            <td>
+                {% if movimentacao.tipo_movimento == 'ENTRADA' %}
+                    <span style="color: green; font-weight: bold;">
+                        Entrada
+                    </span>
+                {% else %}
+                    <span style="color: red; font-weight: bold;">
+                        Saída
+                    </span>
+                {% endif %}
+            </td>
+
+            <td>{{ movimentacao.observacao }}</td>
+
+            <td>
+                <a href="{% url 'movimentacoes_estoque:editar' movimentacao.sequencia %}" class="btn-action btn-edit">
+                    Editar
+                </a>
+                <a href="{% url 'movimentacoes_estoque:excluir' movimentacao.sequencia %}"
+                   class="btn-action btn-delete"
+                   onclick="return confirm('Confirma a exclusão da movimentação?');">
+                    Excluir
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8">Nenhuma movimentação cadastrada.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.formaspagamento',
     'apps.usuarios',
     'apps.produtos',
+    'apps.movimentacoes_estoque',
 
 ]
 
