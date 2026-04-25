@@ -4,7 +4,7 @@ from apps.categorias.models import Categoria
 
 class Produto(models.Model):
 
-    sequencia = models.IntegerField(
+    sequencia = models.AutoField(
         db_column='SEQUENCIA',
         primary_key=True
     )

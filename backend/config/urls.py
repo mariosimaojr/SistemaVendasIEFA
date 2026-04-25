@@ -53,4 +53,8 @@ urlpatterns = [
         include('apps.movimentacoes_estoque.urls')
     ),
 
+    path(
+        'vendas/',
+        include('apps.vendas.urls')
+    ),
 ]

@@ -3,7 +3,7 @@ from django.utils import timezone
 
 class Usuario(models.Model):
 
-    sequencia = models.IntegerField(
+    sequencia = models.AutoField(
         db_column='SEQUENCIA',
         primary_key=True
     )

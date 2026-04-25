@@ -1,26 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
-
-from .models import formaspagamento
-
-from .forms import formaspagamentoForm
+from .models import FormaPagamento
+from .forms import FormaPagamentoForm
 
 
 def lista(request):
 
-    formas = formaspagamento.objects.all()
+    formas = FormaPagamento.objects.all()
 
     return render(
-
         request,
-
         'formaspagamento/lista.html',
-
         {
-
             'formas': formas
-
         }
-
     )
 
 
@@ -28,110 +20,65 @@ def criar(request):
 
     if request.method == 'POST':
 
-        form = formaspagamentoForm(
-
-            request.POST
-
-        )
+        form = FormaPagamentoForm(request.POST)
 
         if form.is_valid():
-
             form.save()
-
             return redirect('formaspagamento:lista')
 
     else:
-
-        form = formaspagamentoForm()
+        form = FormaPagamentoForm()
 
     return render(
-
         request,
-
         'formaspagamento/form.html',
-
         {
-
-            'form': form
+            'form': form,
+            'titulo': 'Nova Forma de Pagamento'
         }
-
     )
 
 
 def editar(request, pk):
 
     forma = get_object_or_404(
-
-        formaspagamento,
-
+        FormaPagamento,
         pk=pk
-
     )
 
     if request.method == 'POST':
 
-        form = formaspagamentoForm(
-
+        form = FormaPagamentoForm(
             request.POST,
-
             instance=forma
-
         )
 
         if form.is_valid():
-
             form.save()
-
             return redirect('formaspagamento:lista')
 
     else:
-
-        form = formaspagamentoForm(
-
+        form = FormaPagamentoForm(
             instance=forma
-
         )
 
     return render(
-
         request,
-
         'formaspagamento/form.html',
-
         {
-
-            'form': form
+            'form': form,
+            'titulo': 'Editar Forma de Pagamento'
         }
-
     )
 
 
 def excluir(request, pk):
 
     forma = get_object_or_404(
-
-        formaspagamento,
-
+        FormaPagamento,
         pk=pk
-
     )
 
-    if request.method == 'POST':
+    forma.delete()
 
-        forma.delete()
-
-        return redirect('formaspagamento:lista')
-
-    return render(
-
-        request,
-
-        'formaspagamento/excluir.html',
-
-        {
-
-            'forma': forma
-
-        }
-
-    )
+    return redirect('formaspagamento:lista')

@@ -27,7 +27,9 @@
                 <a href="{% url 'formaspagamento:editar' forma.sequencia %}" class="btn-action btn-edit">
                     Editar
                 </a>
-                <a href="{% url 'formaspagamento:excluir' forma.sequencia %}" class="btn-action btn-delete">
+                <a href="{% url 'formaspagamento:excluir' forma.sequencia %}"
+                    class="btn-action btn-delete"
+                    onclick="return confirm('Confirma a exclusão da forma de pagamento?');">
                     Excluir
                 </a>
             </td>

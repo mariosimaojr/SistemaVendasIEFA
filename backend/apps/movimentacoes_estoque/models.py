@@ -10,7 +10,7 @@ class MovimentacaoEstoque(models.Model):
         ('SAIDA', 'Saída'),
     ]
 
-    sequencia = models.IntegerField(
+    sequencia = models.AutoField(
         db_column='SEQUENCIA',
         primary_key=True
     )

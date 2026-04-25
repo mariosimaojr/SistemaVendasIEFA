@@ -2,32 +2,35 @@
 
 {% block content %}
 
-<h2>
-    {% if form.instance.pk %}
-        Editar Forma de Pagamento
-    {% else %}
-        Nova Forma de Pagamento
-    {% endif %}
-</h2>
+<h2>{{ titulo }}</h2>
 
 <form method="post">
-
     {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div style="color:red; margin-bottom:10px;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
 
     <p>
         Descrição:<br>
         {{ form.descricao }}
+        {% if form.descricao.errors %}
+            <br><span style="color:red;">{{ form.descricao.errors }}</span>
+        {% endif %}
     </p>
 
     <p>
         Ativo:
         {{ form.ativo }}
+        {% if form.ativo.errors %}
+            <br><span style="color:red;">{{ form.ativo.errors }}</span>
+        {% endif %}
     </p>
 
     <button type="submit" class="btn-save">Salvar</button>
-
     <a href="{% url 'formaspagamento:lista' %}" class="btn-cancel">Cancelar</a>
-
 </form>
 
 {% endblock %}

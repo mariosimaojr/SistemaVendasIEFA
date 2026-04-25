@@ -1,9 +1,9 @@
 from django.db import models
 
 
-class formaspagamento(models.Model):
+class FormaPagamento(models.Model):
 
-    sequencia = models.IntegerField(
+    sequencia = models.AutoField(
         db_column='SEQUENCIA',
         primary_key=True
     )
@@ -19,18 +19,11 @@ class formaspagamento(models.Model):
     )
 
     class Meta:
-
         db_table = 'formaspagamento'
-
         verbose_name = 'Forma de Pagamento'
-
         verbose_name_plural = 'Formas de Pagamento'
-
         ordering = ['descricao']
-
         managed = False
 
-
     def __str__(self):
-
         return self.descricao

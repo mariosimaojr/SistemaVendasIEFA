@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'apps.usuarios',
     'apps.produtos',
     'apps.movimentacoes_estoque',
-
+    'apps.vendas',
 ]
 
 MIDDLEWARE = [
@@ -120,12 +120,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = 'pt-br'
+TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -135,9 +132,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 MIGRATION_MODULES = {
-
-    'apps.categorias': None,
-    'apps.formaspagamento': None,
-    'apps.usuarios': None,
-
+    'categorias': None,
+    'formaspagamento': None,
+    'usuarios': None,
+    'produtos': None,
+    'movimentacoes_estoque': None,
+    'vendas': None,
 }

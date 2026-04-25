@@ -29,7 +29,9 @@
                 <a href="{% url 'usuarios:editar' usuario.sequencia %}" class="btn-action btn-edit">
                     Editar
                 </a>
-                <a href="{% url 'usuarios:excluir' usuario.sequencia %}" class="btn-action btn-delete">
+                <a href="{% url 'usuarios:excluir' usuario.sequencia %}"
+                    class="btn-action btn-delete"
+                    onclick="return confirm('Confirma a exclusão do usuário?');">
                     Excluir
                 </a>
             </td>

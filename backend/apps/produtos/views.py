@@ -94,16 +94,6 @@ def excluir(request, pk):
         pk=pk
     )
 
-    if request.method == 'POST':
+    produto.delete()
 
-        produto.delete()
-
-        return redirect('produtos:lista')
-
-    return render(
-        request,
-        'produtos/excluir.html',
-        {
-            'produto': produto
-        }
-    )
+    return redirect('produtos:lista')

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Vendas</h2>
+
+<a href="{% url 'vendas:novo' %}" class="btn-link">
+    Nova Venda
+</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Usuário</th>
+            <th>Forma de Pagamento</th>
+            <th>Valor Total</th>
+            <th>Observação</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for venda in vendas %}
+        <tr>
+            <td>{{ venda.sequencia }}</td>
+            <td>{{ venda.data_venda }}</td>
+            <td>{{ venda.usuario.login_acesso }}</td>
+            <td>{{ venda.forma_pagamento.descricao }}</td>
+            <td>R$ {{ venda.valor_total }}</td>
+            <td>{{ venda.observacao }}</td>
+            <td>
+                <a href="{% url 'vendas:editar' venda.sequencia %}" class="btn-action btn-edit">
+                    Editar
+                </a>
+                <a href="{% url 'vendas:excluir' venda.sequencia %}" class="btn-action btn-delete">
+                    Excluir
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">Nenhuma venda cadastrada.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

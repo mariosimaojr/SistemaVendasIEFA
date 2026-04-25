@@ -119,16 +119,6 @@ def excluir(request, pk):
         pk=pk
     )
 
-    if request.method == 'POST':
+    movimentacao.delete()
 
-        movimentacao.delete()
-
-        return redirect('movimentacoes_estoque:lista')
-
-    return render(
-        request,
-        'movimentacoes_estoque/excluir.html',
-        {
-            'movimentacao': movimentacao
-        }
-    )
+    return redirect('movimentacoes_estoque:lista')

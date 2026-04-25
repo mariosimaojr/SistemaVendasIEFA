@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>{{ titulo }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <h3>Dados da Venda</h3>
+
+    <p>
+        Data da Venda:<br>
+        {{ form.data_venda }}
+    </p>
+
+    <p>
+        Usuário:<br>
+        {{ form.usuario }}
+    </p>
+
+    <p>
+        Forma de Pagamento:<br>
+        {{ form.forma_pagamento }}
+    </p>
+
+    <p>
+        Observação:<br>
+        {{ form.observacao }}
+    </p>
+
+    <hr>
+
+    <h3>Itens da Venda</h3>
+
+    {{ formset.management_form }}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Excluir</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item_form in formset %}
+            <tr>
+                <td>
+                    {{ item_form.id }}
+                    {{ item_form.produto }}
+                    {% if item_form.produto.errors %}
+                        <div style="color:red;">{{ item_form.produto.errors }}</div>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ item_form.quantidade }}
+                    {% if item_form.quantidade.errors %}
+                        <div style="color:red;">{{ item_form.quantidade.errors }}</div>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ item_form.preco_unitario }}
+                    {% if item_form.preco_unitario.errors %}
+                        <div style="color:red;">{{ item_form.preco_unitario.errors }}</div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item_form.instance.pk %}
+                        {{ item_form.DELETE }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if formset.non_form_errors %}
+        <div style="color:red; margin-top:10px;">
+            {{ formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    <br>
+
+    <button type="submit" class="btn-save">Salvar</button>
+    <a href="{% url 'vendas:lista' %}" class="btn-cancel">Cancelar</a>
+</form>
+
+{% endblock %}

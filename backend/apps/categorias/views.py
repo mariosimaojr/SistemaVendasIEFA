@@ -94,6 +94,4 @@ def excluir_categoria(request, id):
 
     categoria.delete()
 
-    return redirect(
-        'categorias:lista'
-    )
+    return redirect('categorias:lista')

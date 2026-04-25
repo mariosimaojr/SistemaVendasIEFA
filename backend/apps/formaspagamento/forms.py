@@ -1,47 +1,27 @@
 from django import forms
-from .models import formaspagamento
+from .models import FormaPagamento
 
 
-class formaspagamentoForm(forms.ModelForm):
+class FormaPagamentoForm(forms.ModelForm):
 
     class Meta:
-
-        model = formaspagamento
+        model = FormaPagamento
 
         fields = [
-
-            'sequencia',
             'descricao',
             'ativo',
-
         ]
 
         labels = {
-
-            'sequencia': 'Código',
             'descricao': 'Descrição',
             'ativo': 'Ativo',
-
         }
 
         widgets = {
-
-            'sequencia': forms.NumberInput(
-                attrs={
-                    'class': 'form-control'
-                }
-            ),
-
             'descricao': forms.TextInput(
-                attrs={
-                    'class': 'form-control'
-                }
+                attrs={'class': 'form-control'}
             ),
-
             'ativo': forms.CheckboxInput(
-                attrs={
-                    'class': 'form-check-input'
-                }
+                attrs={'class': 'form-check-input'}
             ),
-
         }
