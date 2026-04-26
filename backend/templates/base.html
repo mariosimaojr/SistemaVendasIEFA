@@ -169,6 +169,7 @@
             font-size: 24px;
             font-weight: bold;
             color: white;
+            text-align: center;
             text-decoration: none;
             border-radius: 8px;
         }
@@ -183,6 +184,11 @@
 
         .card-estoque {
             background-color: #2563eb;
+        }
+
+        .card-generico {
+            background-color: #b2b2b2;
+            color: rgb(52, 51, 51);
         }
     </style>
 </head>
@@ -203,7 +209,7 @@
             <a href="{% url 'formaspagamento:lista' %}">Formas de Pagamento</a>
             <a href="{% url 'produtos:lista' %}">Produtos</a>
             <a href="{% url 'movimentacoes_estoque:lista' %}">Estoque</a>
-            <a href="#">Relatórios</a>
+            <a href="{% url 'relatorios:lista' %}">Relatórios</a>
             <a href="{% url 'usuarios:lista' %}">Usuários</a>
         </div>
 

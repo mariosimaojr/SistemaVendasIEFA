@@ -57,4 +57,9 @@ urlpatterns = [
         'vendas/',
         include('apps.vendas.urls')
     ),
+
+    path(
+        'relatorios/',
+        include('apps.relatorios.urls')
+    ),
 ]

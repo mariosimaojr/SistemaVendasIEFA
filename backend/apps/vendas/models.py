@@ -11,7 +11,7 @@ class Venda(models.Model):
         primary_key=True
     )
 
-    data_venda = models.DateTimeField(
+    data_venda = models.DateField(
         db_column='DATA_VENDA'
     )
 

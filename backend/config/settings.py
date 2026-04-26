@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'apps.produtos',
     'apps.movimentacoes_estoque',
     'apps.vendas',
+    'apps.relatorios',
+
 ]
 
 MIDDLEWARE = [
@@ -138,4 +140,5 @@ MIGRATION_MODULES = {
     'produtos': None,
     'movimentacoes_estoque': None,
     'vendas': None,
+    
 }

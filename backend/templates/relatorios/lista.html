@@ -1,0 +1,22 @@
+<!-- templates/relatorios/lista.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Relatórios</h2>
+
+<p>
+    Selecione o relatório desejado:
+</p>
+
+<div class="dashboard-cards">
+    <a href="{% url 'relatorios:codigo_barras' %}" class="dashboard-card card-generico">
+        CÓDIGO DE BARRAS
+    </a>
+
+    <a href="{% url 'relatorios:vendas_forma_pagamento' %}" class="dashboard-card card-generico">
+        VENDAS POR FORMA DE PAGAMENTO
+    </a>
+</div>
+
+{% endblock %}

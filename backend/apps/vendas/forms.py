@@ -8,6 +8,16 @@ from .models import Venda, VendaItem
 
 class VendaForm(forms.ModelForm):
 
+    data_venda = forms.DateField(
+        label='Data da Venda',
+        widget=forms.DateInput(
+            attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }
+        )
+    )
+
     class Meta:
         model = Venda
         fields = [
@@ -25,12 +35,6 @@ class VendaForm(forms.ModelForm):
         }
 
         widgets = {
-            'data_venda': forms.DateTimeInput(
-                attrs={
-                    'class': 'form-control',
-                    'type': 'datetime-local'
-                }
-            ),
             'usuario': forms.Select(
                 attrs={'class': 'form-control'}
             ),

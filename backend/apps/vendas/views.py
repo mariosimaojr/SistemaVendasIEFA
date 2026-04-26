@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import datetime, time
 
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
@@ -36,8 +37,8 @@ def criar(request):
 
             venda = form.save(commit=False)
 
-            if not venda.data_venda:
-                venda.data_venda = timezone.now()
+            data_escolhida = form.cleaned_data['data_venda']
+            venda.data_venda = datetime.combine(data_escolhida, time.min)
 
             venda.valor_total = Decimal('0.00')
             venda.save()
@@ -63,7 +64,7 @@ def criar(request):
 
         form = VendaForm(
             initial={
-                'data_venda': timezone.now().strftime('%Y-%m-%dT%H:%M')
+                'data_venda': timezone.localdate()
             }
         )
 
@@ -103,6 +104,10 @@ def editar(request, pk):
         if form.is_valid() and formset.is_valid():
 
             venda = form.save(commit=False)
+
+            data_escolhida = form.cleaned_data['data_venda']
+            venda.data_venda = datetime.combine(data_escolhida, time.min)
+
             venda.valor_total = Decimal('0.00')
             venda.save()
 
@@ -126,7 +131,13 @@ def editar(request, pk):
 
     else:
 
-        form = VendaForm(instance=venda)
+        form = VendaForm(
+            instance=venda,
+            initial={
+                'data_venda': venda.data_venda.date() if venda.data_venda else None
+            }
+        )
+
         formset = VendaItemFormSet(instance=venda)
 
     return render(

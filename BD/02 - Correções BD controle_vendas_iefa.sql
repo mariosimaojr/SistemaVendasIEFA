@@ -50,3 +50,10 @@ ALTER TABLE produtos
 CHANGE COLUMN `PRECO_VENDA` PRECO_VENDA DECIMAL(10,2) NOT NULL;
 
 COMMIT;
+
+-- ============================================
+-- 6) Corrigir campo DATA_VENDA para apenas Date -> não DateTime
+-- ============================================
+
+ALTER TABLE vendas
+MODIFY COLUMN DATA_VENDA DATE NOT NULL;
