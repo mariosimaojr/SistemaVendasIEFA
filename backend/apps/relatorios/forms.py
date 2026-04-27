@@ -1,6 +1,8 @@
 from django import forms
 from django.utils import timezone
 
+from apps.produtos.models import Produto
+
 
 class RelatorioVendasFormaPagamentoForm(forms.Form):
 
@@ -47,3 +49,25 @@ class RelatorioVendasFormaPagamentoForm(forms.Form):
             )
 
         return cleaned_data
+    
+class RelatorioCodigoBarrasForm(forms.Form):
+
+    produto = forms.ModelChoiceField(
+        label='Produto',
+        queryset=Produto.objects.filter(ativo=True).order_by('nome'),
+        widget=forms.Select(
+            attrs={'class': 'form-control'}
+        )
+    )
+
+    quantidade_etiquetas = forms.IntegerField(
+        label='Quantidade de Etiquetas',
+        min_value=1,
+        initial=1,
+        widget=forms.NumberInput(
+            attrs={
+                'class': 'form-control',
+                'min': '1'
+            }
+        )
+    )

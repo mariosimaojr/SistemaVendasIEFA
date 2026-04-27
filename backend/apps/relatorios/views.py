@@ -7,21 +7,22 @@ from django.db.models.functions import TruncDate
 from django.shortcuts import render
 
 from apps.vendas.models import Venda, VendaItem
-from .forms import RelatorioVendasFormaPagamentoForm
+from .forms import (
+    RelatorioVendasFormaPagamentoForm,
+    RelatorioCodigoBarrasForm,
+)
+
+import base64
+from io import BytesIO
+
+import barcode
+from barcode.writer import ImageWriter
 
 def lista(request):
 
     return render(
         request,
         'relatorios/lista.html'
-    )
-
-
-def codigo_barras(request):
-
-    return render(
-        request,
-        'relatorios/codigo_barras.html'
     )
 
 
@@ -110,5 +111,56 @@ def vendas_forma_pagamento(request):
             'relatorio': relatorio,
             'data_inicial': data_inicial,
             'data_final': data_final,
+        }
+    )
+
+def codigo_barras(request):
+
+    form = RelatorioCodigoBarrasForm(request.GET or None)
+
+    produto = None
+    etiquetas = []
+    quantidade_etiquetas = 0
+
+    if form.is_valid():
+
+        produto = form.cleaned_data['produto']
+        quantidade_etiquetas = form.cleaned_data['quantidade_etiquetas']
+
+        codigo = str(produto.sequencia).zfill(6)
+
+        code128 = barcode.get('code128', codigo, writer=ImageWriter())
+
+        for _ in range(quantidade_etiquetas):
+
+            buffer = BytesIO()
+
+            code128.write(
+                buffer,
+                options={
+                    'write_text': False,
+                    'module_width': 0.25,
+                    'module_height': 15.0,
+                    'quiet_zone': 2.0,
+                }
+            )
+
+            imagem_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+            etiquetas.append({
+                'codigo': codigo,
+                'imagem_base64': imagem_base64,
+                'nome_produto': produto.nome,
+                'preco_venda': produto.preco_venda,
+            })
+
+    return render(
+        request,
+        'relatorios/codigo_barras.html',
+        {
+            'form': form,
+            'produto': produto,
+            'etiquetas': etiquetas,
+            'quantidade_etiquetas': quantidade_etiquetas,
         }
     )

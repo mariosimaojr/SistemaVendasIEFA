@@ -1,18 +1,183 @@
 <!-- templates/relatorios/codigo_barras.html -->
 {% extends 'base.html' %}
 
+{% block style %}
+<style>
+@media print {
+    .sidebar,
+    .header,
+    form,
+    .btn-save,
+    .btn-cancel {
+        display: none !important;
+    }
+
+    .content-box {
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: white !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
-<h2>Relatório - Impressão de Código de Barras</h2>
+<h2 class="no-print">Relatório - Impressão Código de Barras</h2>
 
-<p>
-    Tela em construção.
-</p>
+<form method="get" class="no-print" style="margin-bottom: 25px;">
 
-<p>
-    Aqui futuramente ficará o filtro e a geração do relatório de impressão de código de barras.
-</p>
+    <p>
+        Produto:<br>
+        {{ form.produto }}
+        {% if form.produto.errors %}
+            <br><span style="color:red;">{{ form.produto.errors }}</span>
+        {% endif %}
+    </p>
 
-<a href="{% url 'relatorios:lista' %}" class="btn-cancel">Voltar</a>
+    <p>
+        Quantidade de Etiquetas:<br>
+        {{ form.quantidade_etiquetas }}
+        {% if form.quantidade_etiquetas.errors %}
+            <br><span style="color:red;">{{ form.quantidade_etiquetas.errors }}</span>
+        {% endif %}
+    </p>
+
+    {% if form.non_field_errors %}
+        <div style="color:red; margin-bottom: 15px;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <button type="submit" class="btn-save">Gerar Relatório</button>
+    <a href="{% url 'relatorios:lista' %}" class="btn-cancel">Voltar</a>
+    <button type="button" class="btn-save" onclick="window.print();" style="margin-left: 8px;">
+        Imprimir
+    </button>
+</form>
+
+{% if produto %}
+
+    <div class="no-print" style="margin-bottom: 20px;">
+        <h3>Impressão Código de Barras</h3>
+        <p><strong>Produto:</strong> {{ produto.nome }}</p>
+        <p><strong>Quantidade de Etiquetas:</strong> {{ quantidade_etiquetas }}</p>
+    </div>
+
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
+        .etiquetas-a4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8mm 8mm;
+            width: 190mm;
+            margin: 0 auto;
+        }
+
+        .etiqueta {
+            border: 1px solid #bbb;
+            min-height: 42mm;
+            padding: 4mm;
+            box-sizing: border-box;
+            text-align: center;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: white;
+        }
+
+        .etiqueta-nome {
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1.2;
+            min-height: 28px;
+            overflow: hidden;
+        }
+
+        .etiqueta-barcode {
+            margin: 4px 0;
+        }
+
+        .etiqueta-barcode img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .etiqueta-codigo {
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-top: 2px;
+        }
+
+        .etiqueta-preco {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        @media print {
+            .no-print,
+            .sidebar,
+            .header {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+                margin: 0;
+                padding: 0;
+            }
+
+            .content {
+                padding: 0 !important;
+            }
+
+            .content-box {
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: white !important;
+                box-shadow: none !important;
+            }
+
+            .etiquetas-a4 {
+                width: 100%;
+                gap: 6mm 6mm;
+            }
+
+            .etiqueta {
+                border: 1px solid #999;
+            }
+        }
+    </style>
+
+    <div class="etiquetas-a4">
+        {% for etiqueta in etiquetas %}
+            <div class="etiqueta">
+                <div class="etiqueta-nome">
+                    {{ etiqueta.codigo }} - {{ etiqueta.nome_produto }}
+                </div>
+
+                <div class="etiqueta-barcode">
+                    <img src="data:image/png;base64,{{ etiqueta.imagem_base64 }}" alt="Código de barras">
+                </div>
+
+                <div class="etiqueta-preco">
+                    R$ {{ etiqueta.preco_venda|floatformat:2 }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+{% endif %}
 
 {% endblock %}
