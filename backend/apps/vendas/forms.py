@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django import forms
 from django.forms import inlineformset_factory
 
@@ -61,22 +59,29 @@ class VendaItemForm(forms.ModelForm):
         ]
 
         labels = {
-            'produto': 'Produto',
+            'produto': 'Código de Barras',
             'quantidade': 'Quantidade',
             'preco_unitario': 'Preço Unitário',
         }
 
         widgets = {
-            'produto': forms.Select(
-                attrs={'class': 'form-control'}
+            'produto': forms.NumberInput(
+                attrs={
+                    'class': 'form-control codigo-produto-input',
+                    'placeholder': 'Código do produto'
+                }
             ),
             'quantidade': forms.NumberInput(
-                attrs={'class': 'form-control'}
+                attrs={
+                    'class': 'form-control quantidade-input',
+                    'placeholder': 'Qtd'
+                }
             ),
             'preco_unitario': forms.NumberInput(
                 attrs={
-                    'class': 'form-control',
-                    'step': '0.01'
+                    'class': 'form-control preco-unitario-input',
+                    'step': '0.01',
+                    'placeholder': 'Preço'
                 }
             ),
         }
@@ -108,18 +113,27 @@ class BaseVendaItemFormSet(forms.BaseInlineFormSet):
             if form.cleaned_data.get('DELETE'):
                 continue
 
-            if form.cleaned_data:
+            produto = form.cleaned_data.get('produto')
+            quantidade = form.cleaned_data.get('quantidade')
+            preco_unitario = form.cleaned_data.get('preco_unitario')
+
+            linha_totalmente_vazia = not produto and not quantidade and not preco_unitario
+            if linha_totalmente_vazia:
+                continue
+
+            linha_completa = produto and quantidade and preco_unitario
+            if linha_completa:
                 tem_item = True
 
         if not tem_item:
             raise forms.ValidationError('Informe pelo menos um item para a venda.')
 
-
-VendaItemFormSet = inlineformset_factory(
-    Venda,
-    VendaItem,
-    form=VendaItemForm,
-    formset=BaseVendaItemFormSet,
-    extra=3,
-    can_delete=True
-)
+def criar_venda_item_formset(extra=3):
+    return inlineformset_factory(
+        Venda,
+        VendaItem,
+        form=VendaItemForm,
+        formset=BaseVendaItemFormSet,
+        extra=extra,
+        can_delete=True
+    )

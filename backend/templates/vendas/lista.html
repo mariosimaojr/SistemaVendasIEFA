@@ -33,7 +33,9 @@
                 <a href="{% url 'vendas:editar' venda.sequencia %}" class="btn-action btn-edit">
                     Editar
                 </a>
-                <a href="{% url 'vendas:excluir' venda.sequencia %}" class="btn-action btn-delete">
+                <a href="{% url 'vendas:excluir' venda.sequencia %}"
+                    class="btn-action btn-delete"
+                    onclick="return confirm('Confirma a exclusão da venda?');">
                     Excluir
                 </a>
             </td>

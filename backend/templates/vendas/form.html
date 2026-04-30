@@ -7,6 +7,27 @@
 <form method="post">
     {% csrf_token %}
 
+    {% if form.errors %}
+        <div style="color:red; margin-bottom: 15px;">
+            <strong>Erros no formulário da venda:</strong>
+            {{ form.errors }}
+        </div>
+    {% endif %}
+
+    {% if formset.non_form_errors %}
+        <div style="color:red; margin-bottom: 15px;">
+            <strong>Erros gerais dos itens:</strong>
+            {{ formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    {% if formset.errors %}
+        <div style="color:red; margin-bottom: 15px;">
+            <strong>Erros nas linhas dos itens:</strong>
+            {{ formset.errors }}
+        </div>
+    {% endif %}
+
     <h3>Dados da Venda</h3>
 
     <p>
@@ -19,56 +40,73 @@
         {{ form.usuario }}
     </p>
 
-    <p>
-        Forma de Pagamento:<br>
-        {{ form.forma_pagamento }}
-    </p>
-
-    <p>
-        Observação:<br>
-        {{ form.observacao }}
-    </p>
-
     <hr>
 
     <h3>Itens da Venda</h3>
 
     {{ formset.management_form }}
 
-    <table>
+    <table id="tabela-itens">
         <thead>
             <tr>
+                <th>Código de Barras</th>
                 <th>Produto</th>
                 <th>Quantidade</th>
                 <th>Preço Unitário</th>
+                <th>Subtotal</th>
                 <th>Excluir</th>
             </tr>
         </thead>
         <tbody>
             {% for item_form in formset %}
-            <tr>
+            <tr class="item-row">
                 <td>
-                    {{ item_form.id }}
+                    {{ item_form.sequencia  }}
+                    {% if item_form.id.errors %}
+                        <div style="color:red;">{{ item_form.id.errors }}</div>
+                    {% endif %}
+
                     {{ item_form.produto }}
                     {% if item_form.produto.errors %}
                         <div style="color:red;">{{ item_form.produto.errors }}</div>
                     {% endif %}
                 </td>
+
+                <td>
+                    <div class="nome-produto" style="font-weight:bold; color:#1f2937;">
+                        {% if item_form.instance.produto %}
+                            {{ item_form.instance.produto.nome }}
+                        {% endif %}
+                    </div>
+                </td>
+
                 <td>
                     {{ item_form.quantidade }}
                     {% if item_form.quantidade.errors %}
                         <div style="color:red;">{{ item_form.quantidade.errors }}</div>
                     {% endif %}
                 </td>
+
                 <td>
                     {{ item_form.preco_unitario }}
                     {% if item_form.preco_unitario.errors %}
                         <div style="color:red;">{{ item_form.preco_unitario.errors }}</div>
                     {% endif %}
                 </td>
+
+                <td>
+                    <input type="text" class="form-control subtotal-item" readonly>
+                </td>
+
                 <td>
                     {% if item_form.instance.pk %}
-                        {{ item_form.DELETE }}
+                        <label>
+                            {{ item_form.DELETE }} Excluir
+                        </label>
+                    {% else %}
+                        <button type="button" class="btn-cancel btn-limpar-linha">
+                            Limpar
+                        </button>
                     {% endif %}
                 </td>
             </tr>
@@ -84,8 +122,232 @@
 
     <br>
 
+    <p>
+        <strong>Total da Venda:</strong><br>
+        <input type="text" id="total-venda" class="form-control" readonly style="max-width: 250px; font-weight: bold;">
+    </p>
+
+    <p>
+        Forma de Pagamento:<br>
+        {{ form.forma_pagamento }}
+    </p>
+
+    <p>
+        Observação:<br>
+        {{ form.observacao }}
+    </p>
+
     <button type="submit" class="btn-save">Salvar</button>
     <a href="{% url 'vendas:lista' %}" class="btn-cancel">Cancelar</a>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function calcularSubtotalLinha(row) {
+        const quantidadeInput = row.querySelector('.quantidade-input');
+        const precoInput = row.querySelector('.preco-unitario-input');
+        const subtotalInput = row.querySelector('.subtotal-item');
+
+        const quantidade = parseFloat((quantidadeInput?.value || '0').replace(',', '.')) || 0;
+        const preco = parseFloat((precoInput?.value || '0').replace(',', '.')) || 0;
+
+        const subtotal = quantidade * preco;
+
+        if (subtotalInput) {
+            subtotalInput.value = formatarMoeda(subtotal);
+        }
+
+        return subtotal;
+    }
+
+    function calcularTotalVenda() {
+        let total = 0;
+
+        document.querySelectorAll('.item-row').forEach(row => {
+            total += calcularSubtotalLinha(row);
+        });
+
+        const totalVendaInput = document.getElementById('total-venda');
+        if (totalVendaInput) {
+            totalVendaInput.value = formatarMoeda(total);
+        }
+    }
+
+    function focarProximoCampo(campoAtual) {
+        const campos = Array.from(document.querySelectorAll(
+            '#tabela-itens input, #tabela-itens select, #id_forma_pagamento, #id_observacao'
+        )).filter(el => !el.disabled && el.type !== 'hidden');
+
+        const indiceAtual = campos.indexOf(campoAtual);
+
+        if (indiceAtual >= 0 && indiceAtual < campos.length - 1) {
+            campos[indiceAtual + 1].focus();
+            if (campos[indiceAtual + 1].select) {
+                campos[indiceAtual + 1].select();
+            }
+        }
+    }
+
+    function configurarLinha(row) {
+        const codigoInput = row.querySelector('.codigo-produto-input');
+        const quantidadeInput = row.querySelector('.quantidade-input');
+        const precoInput = row.querySelector('.preco-unitario-input');
+        const subtotalInput = row.querySelector('.subtotal-item');
+        const nomeProdutoDiv = row.querySelector('.nome-produto');
+        const botaoLimpar = row.querySelector('.btn-limpar-linha');
+
+        async function buscarProduto() {
+            const codigo = codigoInput?.value?.trim();
+
+            if (!codigo) {
+                if (nomeProdutoDiv) {
+                    nomeProdutoDiv.textContent = '';
+                    nomeProdutoDiv.style.color = '';
+                }
+                if (precoInput) precoInput.value = '';
+                calcularSubtotalLinha(row);
+                calcularTotalVenda();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/vendas/buscar-produto/?codigo=${codigo}`);
+                const data = await response.json();
+
+                if (data.ok) {
+                    if (nomeProdutoDiv) {
+                        nomeProdutoDiv.textContent = data.nome;
+                        nomeProdutoDiv.style.color = '#1f2937';
+                    }
+
+                    if (precoInput) {
+                        precoInput.value = Number(data.preco_venda).toFixed(2);
+                    }
+
+                    if (quantidadeInput && !quantidadeInput.value) {
+                        quantidadeInput.value = 1;
+                    }
+
+                    calcularSubtotalLinha(row);
+                    calcularTotalVenda();
+
+                    if (quantidadeInput) {
+                        quantidadeInput.focus();
+                        quantidadeInput.select();
+                    }
+
+                } else {
+                    if (nomeProdutoDiv) {
+                        nomeProdutoDiv.textContent = 'Produto não encontrado';
+                        nomeProdutoDiv.style.color = 'red';
+                    }
+
+                    if (precoInput) precoInput.value = '';
+                    calcularSubtotalLinha(row);
+                    calcularTotalVenda();
+                }
+            } catch (error) {
+                if (nomeProdutoDiv) {
+                    nomeProdutoDiv.textContent = 'Erro ao buscar produto';
+                    nomeProdutoDiv.style.color = 'red';
+                }
+            }
+        }
+
+        if (codigoInput) {
+            codigoInput.addEventListener('change', buscarProduto);
+            codigoInput.addEventListener('blur', buscarProduto);
+        }
+
+        if (quantidadeInput) {
+            quantidadeInput.addEventListener('input', () => {
+                calcularSubtotalLinha(row);
+                calcularTotalVenda();
+            });
+        }
+
+        if (precoInput) {
+            precoInput.addEventListener('input', () => {
+                calcularSubtotalLinha(row);
+                calcularTotalVenda();
+            });
+        }
+
+        [codigoInput, quantidadeInput, precoInput].forEach(campo => {
+            if (campo) {
+                campo.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+
+                        if (campo === codigoInput) {
+                            buscarProduto();
+                        } else {
+                            focarProximoCampo(campo);
+                        }
+                    }
+                });
+            }
+        });
+
+        if (botaoLimpar) {
+            botaoLimpar.addEventListener('click', function () {
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => {
+                    if (input.type === 'number' || input.type === 'text') {
+                        input.value = '';
+                    }
+                });
+
+                if (quantidadeInput) {
+                    quantidadeInput.value = 1;
+                }
+
+                if (subtotalInput) {
+                    subtotalInput.value = '';
+                }
+
+                if (nomeProdutoDiv) {
+                    nomeProdutoDiv.textContent = '';
+                    nomeProdutoDiv.style.color = '';
+                }
+
+                calcularTotalVenda();
+
+                if (codigoInput) {
+                    codigoInput.focus();
+                }
+            });
+        }
+
+        calcularSubtotalLinha(row);
+    }
+
+    document.querySelectorAll('.item-row').forEach(configurarLinha);
+
+    calcularTotalVenda();
+
+    const primeiroCodigo = document.querySelector('.codigo-produto-input');
+    if (primeiroCodigo) {
+        primeiroCodigo.focus();
+    }
+
+    const dataVenda = document.getElementById('id_data_venda');
+    if (dataVenda && !dataVenda.value) {
+        const hoje = new Date();
+        const yyyy = hoje.getFullYear();
+        const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dd = String(hoje.getDate()).padStart(2, '0');
+        dataVenda.value = `${yyyy}-${mm}-${dd}`;
+    }
+});
+</script>
 
 {% endblock %}

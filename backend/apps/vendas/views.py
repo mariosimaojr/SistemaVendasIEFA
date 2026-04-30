@@ -1,12 +1,13 @@
 from decimal import Decimal
-from datetime import datetime, time
 
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
-from .models import Venda, VendaItem
-from .forms import VendaForm, VendaItemFormSet
+from apps.produtos.models import Produto
+from .forms import VendaForm, criar_venda_item_formset
+from .models import Venda
 
 
 def lista(request):
@@ -28,6 +29,8 @@ def lista(request):
 @transaction.atomic
 def criar(request):
 
+    VendaItemFormSet = criar_venda_item_formset(extra=3)
+
     if request.method == 'POST':
 
         form = VendaForm(request.POST)
@@ -36,10 +39,6 @@ def criar(request):
         if form.is_valid() and formset.is_valid():
 
             venda = form.save(commit=False)
-
-            data_escolhida = form.cleaned_data['data_venda']
-            venda.data_venda = datetime.combine(data_escolhida, time.min)
-
             venda.valor_total = Decimal('0.00')
             venda.save()
 
@@ -47,6 +46,13 @@ def criar(request):
 
             for item_form in formset:
                 if not item_form.cleaned_data or item_form.cleaned_data.get('DELETE'):
+                    continue
+
+                produto = item_form.cleaned_data.get('produto')
+                quantidade = item_form.cleaned_data.get('quantidade')
+                preco_unitario = item_form.cleaned_data.get('preco_unitario')
+
+                if not (produto and quantidade and preco_unitario):
                     continue
 
                 item = item_form.save(commit=False)
@@ -67,7 +73,6 @@ def criar(request):
                 'data_venda': timezone.localdate()
             }
         )
-
         formset = VendaItemFormSet()
 
     return render(
@@ -84,10 +89,14 @@ def criar(request):
 @transaction.atomic
 def editar(request, pk):
 
-    venda = get_object_or_404(
-        Venda,
-        pk=pk
-    )
+    venda = get_object_or_404(Venda, pk=pk)
+
+    itens_queryset = venda.itens.all().order_by('sequencia')
+
+    quantidade_itens = itens_queryset.count()
+    extra = max(0, 3 - quantidade_itens)
+
+    VendaItemFormSet = criar_venda_item_formset(extra=extra)
 
     if request.method == 'POST':
 
@@ -98,20 +107,14 @@ def editar(request, pk):
 
         formset = VendaItemFormSet(
             request.POST,
-            instance=venda
+            instance=venda,
+            queryset=itens_queryset
         )
 
         if form.is_valid() and formset.is_valid():
 
             venda = form.save(commit=False)
-
-            data_escolhida = form.cleaned_data['data_venda']
-            venda.data_venda = datetime.combine(data_escolhida, time.min)
-
-            venda.valor_total = Decimal('0.00')
             venda.save()
-
-            total = Decimal('0.00')
 
             itens = formset.save(commit=False)
 
@@ -119,10 +122,21 @@ def editar(request, pk):
                 obj.delete()
 
             for item in itens:
+                produto = getattr(item, 'produto', None)
+                quantidade = getattr(item, 'quantidade', None)
+                preco_unitario = getattr(item, 'preco_unitario', None)
+
+                if not (produto and quantidade and preco_unitario):
+                    continue
+
                 item.venda = venda
                 item.subtotal = item.quantidade * item.preco_unitario
-                total += item.subtotal
                 item.save()
+
+            total = Decimal('0.00')
+
+            for item in venda.itens.all():
+                total += item.subtotal or Decimal('0.00')
 
             venda.valor_total = total
             venda.save()
@@ -131,14 +145,12 @@ def editar(request, pk):
 
     else:
 
-        form = VendaForm(
-            instance=venda,
-            initial={
-                'data_venda': venda.data_venda.date() if venda.data_venda else None
-            }
-        )
+        form = VendaForm(instance=venda)
 
-        formset = VendaItemFormSet(instance=venda)
+        formset = VendaItemFormSet(
+            instance=venda,
+            queryset=itens_queryset
+        )
 
     return render(
         request,
@@ -150,7 +162,6 @@ def editar(request, pk):
         }
     )
 
-
 def excluir(request, pk):
 
     venda = get_object_or_404(
@@ -158,14 +169,42 @@ def excluir(request, pk):
         pk=pk
     )
 
-    if request.method == 'POST':
-        venda.delete()
-        return redirect('vendas:lista')
+    venda.delete()
 
-    return render(
-        request,
-        'vendas/excluir.html',
-        {
-            'venda': venda
-        }
-    )
+    return redirect('vendas:lista')
+
+
+def buscar_produto(request):
+
+    codigo = request.GET.get('codigo')
+
+    if not codigo:
+        return JsonResponse(
+            {
+                'ok': False,
+                'mensagem': 'Código não informado.'
+            }
+        )
+
+    try:
+        produto = Produto.objects.get(
+            sequencia=codigo,
+            ativo=True
+        )
+
+        return JsonResponse(
+            {
+                'ok': True,
+                'sequencia': produto.sequencia,
+                'nome': produto.nome,
+                'preco_venda': float(produto.preco_venda),
+            }
+        )
+
+    except Produto.DoesNotExist:
+        return JsonResponse(
+            {
+                'ok': False,
+                'mensagem': 'Produto não encontrado.'
+            }
+        )

@@ -28,4 +28,10 @@ urlpatterns = [
         views.excluir,
         name='excluir'
     ),
+
+    path(
+        'buscar-produto/',
+        views.buscar_produto,
+        name='buscar_produto'
+    ),
 ]
