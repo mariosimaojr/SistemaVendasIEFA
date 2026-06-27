@@ -199,3 +199,5 @@ Antes de alterar campos, rotas ou templates, confira os fontes reais. Não assum
 ## Manutenção futura
 
 Possíveis melhorias devem ser feitas de forma incremental e alinhada aos padrões já existentes. Pontos úteis para evolução incluem ampliar testes, revisar consistência entre forms/views/templates, documentar mudanças de banco e manter este README sincronizado com a estrutura real do projeto.
+
+Teste de merge realizado com TortoiseGit.
