@@ -1,0 +1,543 @@
+{% extends 'base.html' %}
+
+{% block style %}
+<style>
+    .pdv-page {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .pdv-message {
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        border: 1px solid #86efac;
+        background: #dcfce7;
+        color: #14532d;
+        font-weight: bold;
+    }
+
+    .pdv-error {
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        border: 1px solid #fca5a5;
+        background: #fee2e2;
+        color: #7f1d1d;
+        font-weight: bold;
+    }
+
+    .pdv-toolbar {
+        display: grid;
+        grid-template-columns: minmax(180px, 260px) 1fr;
+        gap: 18px;
+        align-items: end;
+        margin-bottom: 16px;
+    }
+
+    .pdv-field label,
+    .pdv-produto-label,
+    .pdv-cupom-label,
+    .pdv-total-label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 20px;
+        color: #111827;
+    }
+
+    .pdv-select,
+    .pdv-payment-select {
+        width: 100%;
+        max-width: none;
+        height: 42px;
+        border: 1px solid #9ca3af;
+        background: white;
+        font-size: 18px;
+        padding: 6px 8px;
+        box-sizing: border-box;
+    }
+
+    .pdv-produto-grid {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 18px;
+        margin-bottom: 8px;
+    }
+
+    .pdv-code-input,
+    .pdv-name-input {
+        width: 100%;
+        max-width: none;
+        height: 54px;
+        box-sizing: border-box;
+        border: 1px solid #6b7280;
+        font-size: 25px;
+        padding: 8px;
+        background: white;
+    }
+
+    .pdv-code-input {
+        text-align: center;
+    }
+
+    .pdv-name-input {
+        text-transform: uppercase;
+    }
+
+    .pdv-cupom {
+        min-height: 210px;
+        border: 1px solid #6b7280;
+        background: #fff3c4;
+        padding: 10px;
+        box-sizing: border-box;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 22px;
+        line-height: 1.25;
+        white-space: pre-wrap;
+        overflow: auto;
+    }
+
+    .pdv-cupom-vazio {
+        color: #6b7280;
+    }
+
+    .pdv-item-nome {
+        text-transform: uppercase;
+    }
+
+    .pdv-item-linha {
+        display: grid;
+        grid-template-columns: minmax(180px, 1fr) 160px;
+        gap: 12px;
+    }
+
+    .pdv-footer {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+        align-items: end;
+        margin-top: 10px;
+    }
+
+    .pdv-total-valor {
+        color: #c40000;
+        font-size: 46px;
+        line-height: 1;
+        text-align: center;
+    }
+
+    .pdv-finalizar {
+        width: 100%;
+        height: 88px;
+        border: 1px solid #004f93;
+        background: #0875c9;
+        color: white;
+        cursor: pointer;
+        font-size: 27px;
+        font-weight: bold;
+    }
+
+    .pdv-finalizar:hover {
+        background: #075ea1;
+    }
+
+    .pdv-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.72);
+        z-index: 20;
+    }
+
+    .pdv-overlay.is-open {
+        display: flex;
+    }
+
+    .pdv-modal {
+        width: min(520px, calc(100vw - 40px));
+        border: 2px solid #111827;
+        background: white;
+        padding: 24px 28px;
+        box-sizing: border-box;
+    }
+
+    .pdv-modal label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 25px;
+    }
+
+    .pdv-payment-options {
+        display: grid;
+        gap: 18px;
+        margin: 18px 0 28px;
+    }
+
+    .pdv-payment-option {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 0;
+        cursor: pointer;
+        font-size: 34px;
+        text-transform: uppercase;
+    }
+
+    .pdv-payment-option input[type="radio"] {
+        width: 34px;
+        height: 34px;
+        margin: 0;
+        accent-color: #111827;
+    }
+
+    .pdv-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .pdv-modal-finalizar,
+    .pdv-modal-voltar {
+        min-width: 150px;
+        height: 50px;
+        border: 1px solid #1f2937;
+        cursor: pointer;
+        font-size: 27px;
+    }
+
+    .pdv-modal-finalizar {
+        background: #0875c9;
+        color: white;
+    }
+
+    .pdv-modal-voltar {
+        background: #d1d5db;
+        color: #111827;
+    }
+
+    @media (max-width: 820px) {
+        .pdv-toolbar,
+        .pdv-produto-grid,
+        .pdv-footer {
+            grid-template-columns: 1fr;
+        }
+
+        .pdv-finalizar {
+            height: 72px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="pdv-page">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="pdv-message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if form.errors %}
+        <div class="pdv-error">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div id="pdv-inline-message" class="pdv-error" style="display: none;"></div>
+
+    <form id="pdv-form" method="post" data-buscar-url="{% url 'pdv:buscar_produto' %}">
+        {% csrf_token %}
+        {{ form.itens_json }}
+
+        <div class="pdv-toolbar">
+            <div class="pdv-field">
+                <label for="{{ form.usuario.id_for_label }}">Operador</label>
+                {{ form.usuario }}
+            </div>
+        </div>
+
+        <label class="pdv-produto-label" for="pdv-codigo-produto">Produto</label>
+        <div class="pdv-produto-grid">
+            <input
+                id="pdv-codigo-produto"
+                class="pdv-code-input"
+                type="number"
+                inputmode="numeric"
+                autocomplete="off"
+            >
+            <input
+                id="pdv-nome-produto"
+                class="pdv-name-input"
+                type="text"
+                readonly
+            >
+        </div>
+
+        <label class="pdv-cupom-label" for="pdv-cupom">Venda</label>
+        <div id="pdv-cupom" class="pdv-cupom" aria-live="polite"></div>
+
+        <div class="pdv-footer">
+            <div>
+                <div class="pdv-total-label">Valor Total da Venda</div>
+                <div id="pdv-total-venda" class="pdv-total-valor">0,00</div>
+            </div>
+
+            <button id="pdv-abrir-finalizacao" class="pdv-finalizar" type="button">
+                FINALIZAR VENDA [F4]
+            </button>
+        </div>
+
+        <div id="pdv-modal" class="pdv-overlay" aria-hidden="true">
+            <div class="pdv-modal" role="dialog" aria-modal="true" aria-labelledby="pdv-modal-titulo">
+                <label id="pdv-modal-titulo">
+                    Forma de Pagamento
+                </label>
+
+                <div class="pdv-payment-options">
+                    {% for radio in form.forma_pagamento %}
+                        <label class="pdv-payment-option" for="{{ radio.id_for_label }}">
+                            {{ radio.tag }}
+                            <span>{{ radio.choice_label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <div class="pdv-modal-actions">
+                    <button id="pdv-finalizar" class="pdv-modal-finalizar" type="submit">
+                        FINALIZAR
+                    </button>
+                    <button id="pdv-voltar" class="pdv-modal-voltar" type="button">
+                        VOLTAR
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('pdv-form');
+    const buscarUrl = form.dataset.buscarUrl;
+    const usuarioSelect = document.getElementById('id_usuario');
+    const formaPagamentoRadios = Array.from(document.querySelectorAll('input[name="forma_pagamento"]'));
+    const itensJsonInput = document.getElementById('id_itens_json');
+    const codigoInput = document.getElementById('pdv-codigo-produto');
+    const nomeProdutoInput = document.getElementById('pdv-nome-produto');
+    const cupom = document.getElementById('pdv-cupom');
+    const totalVenda = document.getElementById('pdv-total-venda');
+    const abrirFinalizacao = document.getElementById('pdv-abrir-finalizacao');
+    const modal = document.getElementById('pdv-modal');
+    const finalizar = document.getElementById('pdv-finalizar');
+    const voltar = document.getElementById('pdv-voltar');
+    const inlineMessage = document.getElementById('pdv-inline-message');
+    const itens = new Map();
+
+    function formatarNumero(valor) {
+        return Number(valor).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function mostrarMensagem(texto) {
+        inlineMessage.textContent = texto;
+        inlineMessage.style.display = 'block';
+    }
+
+    function limparMensagem() {
+        inlineMessage.textContent = '';
+        inlineMessage.style.display = 'none';
+    }
+
+    function atualizarItensJson() {
+        const payload = Array.from(itens.values()).map(item => ({
+            produto_id: item.produto_id,
+            quantidade: item.quantidade
+        }));
+
+        itensJsonInput.value = JSON.stringify(payload);
+    }
+
+    function renderizarCupom() {
+        let total = 0;
+        cupom.innerHTML = '';
+
+        if (itens.size === 0) {
+            const vazio = document.createElement('div');
+            vazio.className = 'pdv-cupom-vazio';
+            vazio.textContent = 'CAIXA LIVRE';
+            cupom.appendChild(vazio);
+            totalVenda.textContent = '0,00';
+            atualizarItensJson();
+            return;
+        }
+
+        itens.forEach(item => {
+            const subtotal = item.quantidade * item.preco_venda;
+            total += subtotal;
+
+            const nome = document.createElement('div');
+            nome.className = 'pdv-item-nome';
+            nome.textContent = item.nome;
+
+            const linha = document.createElement('div');
+            linha.className = 'pdv-item-linha';
+
+            const quantidadePreco = document.createElement('span');
+            quantidadePreco.textContent = String(item.quantidade).padStart(3, '0')
+                + ' X R$ ' + formatarNumero(item.preco_venda);
+
+            const subtotalTexto = document.createElement('span');
+            subtotalTexto.textContent = 'R$ ' + formatarNumero(subtotal);
+
+            linha.appendChild(quantidadePreco);
+            linha.appendChild(subtotalTexto);
+
+            cupom.appendChild(nome);
+            cupom.appendChild(linha);
+        });
+
+        totalVenda.textContent = formatarNumero(total);
+        atualizarItensJson();
+        cupom.scrollTop = cupom.scrollHeight;
+    }
+
+    async function buscarProduto() {
+        const codigo = codigoInput.value.trim();
+
+        if (!codigo) {
+            nomeProdutoInput.value = '';
+            return;
+        }
+
+        limparMensagem();
+
+        try {
+            const response = await fetch(`${buscarUrl}?codigo=${encodeURIComponent(codigo)}`);
+            const data = await response.json();
+
+            if (!data.ok) {
+                nomeProdutoInput.value = '';
+                mostrarMensagem(data.mensagem || 'Produto nao encontrado.');
+                codigoInput.select();
+                return;
+            }
+
+            const produtoId = Number(data.sequencia);
+            const itemAtual = itens.get(produtoId);
+
+            if (itemAtual) {
+                itemAtual.quantidade += 1;
+            } else {
+                itens.set(produtoId, {
+                    produto_id: produtoId,
+                    nome: data.nome,
+                    preco_venda: Number(data.preco_venda),
+                    quantidade: 1
+                });
+            }
+
+            nomeProdutoInput.value = '';
+            codigoInput.value = '';
+            renderizarCupom();
+            codigoInput.focus();
+        } catch (error) {
+            mostrarMensagem('Erro ao buscar produto.');
+        }
+    }
+
+    function abrirModalFinalizacao() {
+        limparMensagem();
+
+        if (itens.size === 0) {
+            mostrarMensagem('Informe pelo menos um item para finalizar a venda.');
+            codigoInput.focus();
+            return;
+        }
+
+        if (!usuarioSelect.value) {
+            usuarioSelect.reportValidity();
+            usuarioSelect.focus();
+            return;
+        }
+
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+
+        const formaSelecionada = formaPagamentoRadios.find(radio => radio.checked);
+        const formaParaFocar = formaSelecionada || formaPagamentoRadios[0];
+
+        if (formaParaFocar) {
+            formaParaFocar.focus();
+        }
+    }
+
+    function fecharModalFinalizacao() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        codigoInput.focus();
+    }
+
+    codigoInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            buscarProduto();
+        }
+    });
+
+    codigoInput.addEventListener('change', buscarProduto);
+    abrirFinalizacao.addEventListener('click', abrirModalFinalizacao);
+    voltar.addEventListener('click', fecharModalFinalizacao);
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'F4') {
+            event.preventDefault();
+            abrirModalFinalizacao();
+        }
+
+        if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+            fecharModalFinalizacao();
+        }
+
+        if (event.key === 'Enter' && modal.classList.contains('is-open')) {
+            event.preventDefault();
+            form.requestSubmit(finalizar);
+        }
+    });
+
+    form.addEventListener('submit', function (event) {
+        atualizarItensJson();
+
+        if (itens.size === 0) {
+            event.preventDefault();
+            fecharModalFinalizacao();
+            mostrarMensagem('Informe pelo menos um item para finalizar a venda.');
+            return;
+        }
+
+        const formaSelecionada = formaPagamentoRadios.some(radio => radio.checked);
+
+        if (!formaSelecionada) {
+            event.preventDefault();
+            if (formaPagamentoRadios[0]) {
+                formaPagamentoRadios[0].reportValidity();
+                formaPagamentoRadios[0].focus();
+            }
+        }
+    });
+
+    renderizarCupom();
+    codigoInput.focus();
+});
+</script>
+
+{% endblock %}

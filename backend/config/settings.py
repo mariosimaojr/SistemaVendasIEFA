@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'apps.produtos',
     'apps.movimentacoes_estoque',
     'apps.vendas',
+    'apps.pdv',
     'apps.relatorios',
 
 ]
@@ -140,5 +141,6 @@ MIGRATION_MODULES = {
     'produtos': None,
     'movimentacoes_estoque': None,
     'vendas': None,
+    'pdv': None,
     
 }
