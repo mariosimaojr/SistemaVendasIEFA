@@ -59,6 +59,11 @@ urlpatterns = [
     ),
 
     path(
+        'pdv/',
+        include('apps.pdv.urls')
+    ),
+
+    path(
         'relatorios/',
         include('apps.relatorios.urls')
     ),
