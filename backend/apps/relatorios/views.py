@@ -140,7 +140,7 @@ def codigo_barras(request):
                 options={
                     'write_text': False,
                     'module_width': 0.25,
-                    'module_height': 15.0,
+                    'module_height': 9.0,
                     'quiet_zone': 2.0,
                 }
             )
