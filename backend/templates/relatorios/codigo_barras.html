@@ -180,4 +180,12 @@
 
 {% endif %}
 
+{% if auto_print and produto %}
+    <script>
+    window.addEventListener('load', function () {
+        window.print();
+    });
+    </script>
+{% endif %}
+
 {% endblock %}

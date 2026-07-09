@@ -121,11 +121,13 @@ def codigo_barras(request):
     produto = None
     etiquetas = []
     quantidade_etiquetas = 0
+    auto_print = False
 
     if form.is_valid():
 
         produto = form.cleaned_data['produto']
         quantidade_etiquetas = form.cleaned_data['quantidade_etiquetas']
+        auto_print = request.GET.get('auto_print') == '1'
 
         codigo = str(produto.sequencia).zfill(6)
 
@@ -162,5 +164,6 @@ def codigo_barras(request):
             'produto': produto,
             'etiquetas': etiquetas,
             'quantidade_etiquetas': quantidade_etiquetas,
+            'auto_print': auto_print,
         }
     )

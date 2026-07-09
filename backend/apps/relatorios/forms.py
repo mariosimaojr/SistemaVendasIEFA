@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.produtos.models import Produto
@@ -71,3 +72,26 @@ class RelatorioCodigoBarrasForm(forms.Form):
             }
         )
     )
+
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        queryset = Produto.objects.filter(ativo=True)
+
+        if self.is_bound:
+            produto_id = self.data.get(self.add_prefix('produto'))
+
+            if produto_id:
+                try:
+                    produto_id = int(produto_id)
+                except (TypeError, ValueError):
+                    produto_id = None
+
+                if produto_id:
+                    queryset = Produto.objects.filter(
+                        Q(ativo=True) |
+                        Q(pk=produto_id)
+                    )
+
+        self.fields['produto'].queryset = queryset.order_by('nome')

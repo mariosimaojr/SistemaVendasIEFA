@@ -1,5 +1,83 @@
 {% extends 'base.html' %}
 
+{% block style %}
+<style>
+    .produto-modal-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.72);
+        z-index: 20;
+    }
+
+    .produto-modal-overlay.is-open {
+        display: flex;
+    }
+
+    .produto-modal {
+        width: min(520px, calc(100vw - 40px));
+        border: 2px solid #111827;
+        background: white;
+        padding: 28px 36px;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .produto-modal h3 {
+        margin: 0 0 24px;
+        font-size: 30px;
+        color: #4b5563;
+    }
+
+    .produto-modal input {
+        width: 100%;
+        max-width: none;
+        margin-bottom: 20px;
+        font-size: 20px;
+    }
+
+    .produto-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .produto-btn-primary,
+    .produto-btn-danger,
+    .produto-btn-secondary {
+        display: inline-block;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .produto-btn-primary {
+        background-color: #6d5dd3;
+    }
+
+    .produto-btn-danger {
+        background-color: #dc3545;
+    }
+
+    .produto-btn-secondary {
+        background-color: #6b7280;
+    }
+
+    .produto-modal-error {
+        display: none;
+        margin-bottom: 14px;
+        color: red;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <h2>{{ titulo }}</h2>
@@ -7,33 +85,179 @@
 <form method="post">
     {% csrf_token %}
 
+    {% if form.non_field_errors %}
+        <div style="color:red; margin-bottom: 15px;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
     <p>
         Nome:<br>
         {{ form.nome }}
+        {% if form.nome.errors %}
+            <br><span style="color:red;">{{ form.nome.errors }}</span>
+        {% endif %}
     </p>
 
     <p>
         Descrição:<br>
         {{ form.descricao }}
+        {% if form.descricao.errors %}
+            <br><span style="color:red;">{{ form.descricao.errors }}</span>
+        {% endif %}
     </p>
 
     <p>
         Categoria:<br>
         {{ form.categoria }}
+        {% if form.categoria.errors %}
+            <br><span style="color:red;">{{ form.categoria.errors }}</span>
+        {% endif %}
     </p>
 
     <p>
         Preço de Venda:<br>
         {{ form.preco_venda }}
+        {% if form.preco_venda.errors %}
+            <br><span style="color:red;">{{ form.preco_venda.errors }}</span>
+        {% endif %}
     </p>
+
+    {% if form.estoque_inicial %}
+        <p>
+            Estoque Inicial:<br>
+            {{ form.estoque_inicial }}
+            {% if form.estoque_inicial.errors %}
+                <br><span style="color:red;">{{ form.estoque_inicial.errors }}</span>
+            {% endif %}
+        </p>
+    {% endif %}
+
+    {% if form.usuario_estoque %}
+        <p>
+            Usuário do Estoque:<br>
+            {{ form.usuario_estoque }}
+            {% if form.usuario_estoque.errors %}
+                <br><span style="color:red;">{{ form.usuario_estoque.errors }}</span>
+            {% endif %}
+        </p>
+    {% endif %}
 
     <p>
         Ativo:
         {{ form.ativo }}
+        {% if form.ativo.errors %}
+            <br><span style="color:red;">{{ form.ativo.errors }}</span>
+        {% endif %}
     </p>
 
     <button type="submit" class="btn-save">Salvar</button>
     <a href="{% url 'produtos:lista' %}" class="btn-cancel">Cancelar</a>
 </form>
+
+{% if produto_criado %}
+    <div id="modal-imprimir-etiquetas" class="produto-modal-overlay is-open" aria-hidden="false">
+        <div class="produto-modal" role="dialog" aria-modal="true" aria-labelledby="modal-imprimir-titulo">
+            <h3 id="modal-imprimir-titulo">Deseja imprimir as etiquetas?</h3>
+
+            <div class="produto-modal-actions">
+                <button type="button" id="btn-imprimir-sim" class="produto-btn-primary">
+                    Sim
+                </button>
+                <button type="button" id="btn-imprimir-nao" class="produto-btn-danger">
+                    Não
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-quantidade-etiquetas" class="produto-modal-overlay" aria-hidden="true">
+        <div class="produto-modal" role="dialog" aria-modal="true" aria-labelledby="modal-quantidade-titulo">
+            <h3 id="modal-quantidade-titulo">Quantidade de Etiquetas</h3>
+
+            <div id="quantidade-etiquetas-erro" class="produto-modal-error">
+                Informe uma quantidade maior que zero.
+            </div>
+
+            <input
+                type="number"
+                id="quantidade-etiquetas"
+                min="1"
+                step="1"
+                value="1"
+            >
+
+            <div class="produto-modal-actions">
+                <button type="button" id="btn-etiquetas-imprimir" class="produto-btn-primary">
+                    Imprimir
+                </button>
+                <button type="button" id="btn-etiquetas-cancelar" class="produto-btn-secondary">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const listaUrl = "{% url 'produtos:lista' %}";
+        const relatorioUrl = "{% url 'relatorios:codigo_barras' %}";
+        const produtoCriado = "{{ produto_criado }}";
+
+        const modalImprimir = document.getElementById('modal-imprimir-etiquetas');
+        const modalQuantidade = document.getElementById('modal-quantidade-etiquetas');
+        const quantidadeInput = document.getElementById('quantidade-etiquetas');
+        const quantidadeErro = document.getElementById('quantidade-etiquetas-erro');
+
+        function abrirModalQuantidade() {
+            modalImprimir.classList.remove('is-open');
+            modalImprimir.setAttribute('aria-hidden', 'true');
+            modalQuantidade.classList.add('is-open');
+            modalQuantidade.setAttribute('aria-hidden', 'false');
+            quantidadeInput.focus();
+            quantidadeInput.select();
+        }
+
+        function voltarParaLista() {
+            window.location.href = listaUrl;
+        }
+
+        function imprimirEtiquetas() {
+            const quantidade = Number(quantidadeInput.value);
+
+            if (!Number.isInteger(quantidade) || quantidade <= 0) {
+                quantidadeErro.style.display = 'block';
+                quantidadeInput.focus();
+                quantidadeInput.select();
+                return;
+            }
+
+            const params = new URLSearchParams({
+                produto: produtoCriado,
+                quantidade_etiquetas: String(quantidade),
+                auto_print: '1'
+            });
+
+            window.location.href = `${relatorioUrl}?${params.toString()}`;
+        }
+
+        document.getElementById('btn-imprimir-sim').addEventListener('click', abrirModalQuantidade);
+        document.getElementById('btn-imprimir-nao').addEventListener('click', voltarParaLista);
+        document.getElementById('btn-etiquetas-cancelar').addEventListener('click', voltarParaLista);
+        document.getElementById('btn-etiquetas-imprimir').addEventListener('click', imprimirEtiquetas);
+
+        quantidadeInput.addEventListener('input', function () {
+            quantidadeErro.style.display = 'none';
+        });
+
+        quantidadeInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                imprimirEtiquetas();
+            }
+        });
+    });
+    </script>
+{% endif %}
 
 {% endblock %}
