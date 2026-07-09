@@ -4,9 +4,19 @@
 
 <h2>Produtos</h2>
 
-<a href="{% url 'produtos:novo' %}" class="btn-link">
-    Novo Produto
-</a>
+<div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px;">
+    <a href="{% url 'produtos:novo' %}" class="btn-link" style="margin-bottom: 0;">
+        Novo Produto
+    </a>
+
+    <form method="get" style="display: flex; align-items: center; gap: 10px; margin: 0;">
+        <label for="q">Pesquisa</label>
+        <input type="text" id="q" name="q" value="{{ q }}" style="width: 350px;">
+        <button type="submit" class="btn-save">
+            Localizar
+        </button>
+    </form>
+</div>
 
 <table>
     <thead>
@@ -15,7 +25,7 @@
             <th>Nome</th>
             <th>Categoria</th>
             <th>Preço de Venda</th>
-            <th>Ativo</th>
+            <th>Estoque</th>
             <th>Ações</th>
         </tr>
     </thead>
@@ -27,7 +37,17 @@
             <td>{{ produto.categoria.nome }}</td>
             <td>R$ {{ produto.preco_venda }}</td>
             <td>
-                {% if produto.ativo %}Sim{% else %}Não{% endif %}
+                {% if produto.estoque_atual > 0 %}
+                    <span style="color: green; font-weight: bold;">
+                        {{ produto.estoque_atual }}
+                    </span>
+                {% elif produto.estoque_atual < 0 %}
+                    <span style="color: red; font-weight: bold;">
+                        {{ produto.estoque_atual }}
+                    </span>
+                {% else %}
+                    {{ produto.estoque_atual }}
+                {% endif %}
             </td>
             <td>
                 <a href="{% url 'produtos:editar' produto.sequencia %}" class="btn-action btn-edit">

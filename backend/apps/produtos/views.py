@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from .models import Produto
@@ -7,13 +9,27 @@ from .forms import ProdutoForm
 
 def lista(request):
 
-    produtos = Produto.objects.select_related('categoria').all()
+    q = request.GET.get('q', '').strip()
+
+    produtos = Produto.objects.select_related('categoria').annotate(
+        estoque_atual=Coalesce(
+            Sum('movimentacaoestoque__quantidade'),
+            0
+        )
+    )
+
+    if q:
+        produtos = produtos.filter(
+            Q(nome__icontains=q) |
+            Q(categoria__nome__icontains=q)
+        )
 
     return render(
         request,
         'produtos/lista.html',
         {
-            'produtos': produtos
+            'produtos': produtos,
+            'q': q
         }
     )
 
