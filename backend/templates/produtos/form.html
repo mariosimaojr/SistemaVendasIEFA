@@ -133,16 +133,6 @@
         </p>
     {% endif %}
 
-    {% if form.usuario_estoque %}
-        <p>
-            Usuário do Estoque:<br>
-            {{ form.usuario_estoque }}
-            {% if form.usuario_estoque.errors %}
-                <br><span style="color:red;">{{ form.usuario_estoque.errors }}</span>
-            {% endif %}
-        </p>
-    {% endif %}
-
     <p>
         Ativo:
         {{ form.ativo }}

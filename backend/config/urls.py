@@ -17,10 +17,24 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from apps.usuarios import views as usuarios_views
+
 from . import views
 
 
 urlpatterns = [
+
+    path(
+        'login/',
+        usuarios_views.login_view,
+        name='login'
+    ),
+
+    path(
+        'logout/',
+        usuarios_views.logout_view,
+        name='logout'
+    ),
 
     path(
         '',

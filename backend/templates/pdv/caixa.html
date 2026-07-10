@@ -257,13 +257,6 @@
         {% csrf_token %}
         {{ form.itens_json }}
 
-        <div class="pdv-toolbar">
-            <div class="pdv-field">
-                <label for="{{ form.usuario.id_for_label }}">Operador</label>
-                {{ form.usuario }}
-            </div>
-        </div>
-
         <label class="pdv-produto-label" for="pdv-codigo-produto">Produto</label>
         <div class="pdv-produto-grid">
             <input
@@ -327,7 +320,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('pdv-form');
     const buscarUrl = form.dataset.buscarUrl;
-    const usuarioSelect = document.getElementById('id_usuario');
     const formaPagamentoRadios = Array.from(document.querySelectorAll('input[name="forma_pagamento"]'));
     const itensJsonInput = document.getElementById('id_itens_json');
     const codigoInput = document.getElementById('pdv-codigo-produto');
@@ -461,12 +453,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (itens.size === 0) {
             mostrarMensagem('Informe pelo menos um item para finalizar a venda.');
             codigoInput.focus();
-            return;
-        }
-
-        if (!usuarioSelect.value) {
-            usuarioSelect.reportValidity();
-            usuarioSelect.focus();
             return;
         }
 

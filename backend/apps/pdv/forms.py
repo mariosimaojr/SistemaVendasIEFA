@@ -3,22 +3,9 @@ import json
 from django import forms
 
 from apps.formaspagamento.models import FormaPagamento
-from apps.usuarios.models import Usuario
 
 
 class PdvVendaForm(forms.Form):
-
-    usuario = forms.ModelChoiceField(
-        label='Operador',
-        queryset=Usuario.objects.none(),
-        empty_label='Selecione o operador',
-        widget=forms.Select(
-            attrs={
-                'class': 'pdv-select',
-                'required': 'required',
-            }
-        )
-    )
 
     forma_pagamento = forms.ModelChoiceField(
         label='Forma de Pagamento',
@@ -41,10 +28,6 @@ class PdvVendaForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.fields['usuario'].queryset = Usuario.objects.filter(
-            ativo=True
-        ).order_by('login_acesso')
 
         self.fields['forma_pagamento'].queryset = FormaPagamento.objects.filter(
             ativo=True

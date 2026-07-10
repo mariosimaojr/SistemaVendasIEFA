@@ -1,7 +1,5 @@
 from django import forms
 
-from apps.usuarios.models import Usuario
-
 from .models import Produto
 
 
@@ -19,28 +17,14 @@ class ProdutoForm(forms.ModelForm):
         )
     )
 
-    usuario_estoque = forms.ModelChoiceField(
-        label='Usuario do Estoque',
-        required=False,
-        queryset=Usuario.objects.none(),
-        widget=forms.Select(
-            attrs={'class': 'form-control'}
-        )
-    )
-
     def __init__(self, *args, **kwargs):
 
         self.is_create = kwargs.pop('is_create', False)
 
         super().__init__(*args, **kwargs)
 
-        if self.is_create:
-            self.fields['usuario_estoque'].queryset = Usuario.objects.filter(
-                ativo=True
-            ).order_by('login_acesso')
-        else:
+        if not self.is_create:
             self.fields.pop('estoque_inicial', None)
-            self.fields.pop('usuario_estoque', None)
 
     class Meta:
         model = Produto
@@ -99,14 +83,5 @@ class ProdutoForm(forms.ModelForm):
 
         if not self.is_create:
             return cleaned_data
-
-        estoque_inicial = cleaned_data.get('estoque_inicial') or 0
-        usuario_estoque = cleaned_data.get('usuario_estoque')
-
-        if estoque_inicial > 0 and not usuario_estoque:
-            self.add_error(
-                'usuario_estoque',
-                'Informe o usuario do estoque para registrar a entrada inicial.'
-            )
 
         return cleaned_data

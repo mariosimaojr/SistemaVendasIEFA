@@ -12,7 +12,6 @@ class MovimentacaoEstoqueForm(forms.ModelForm):
             'quantidade',
             'data_movimento',
             'observacao',
-            'usuario',
             'tipo_movimento',
         ]
 
@@ -20,8 +19,7 @@ class MovimentacaoEstoqueForm(forms.ModelForm):
             'produto': 'Produto',
             'quantidade': 'Quantidade',
             'data_movimento': 'Data do Movimento',
-            'observacao': 'Observação',
-            'usuario': 'Usuário',
+            'observacao': 'Observacao',
             'tipo_movimento': 'Tipo de Movimento',
         }
 
@@ -44,9 +42,6 @@ class MovimentacaoEstoqueForm(forms.ModelForm):
                     'rows': 4
                 }
             ),
-            'usuario': forms.Select(
-                attrs={'class': 'form-control'}
-            ),
             'tipo_movimento': forms.RadioSelect(),
         }
 
@@ -67,6 +62,6 @@ class MovimentacaoEstoqueForm(forms.ModelForm):
         observacao = self.cleaned_data.get('observacao')
 
         if not observacao or not observacao.strip():
-            raise forms.ValidationError('Informe a observação.')
+            raise forms.ValidationError('Informe a observacao.')
 
         return observacao.strip()

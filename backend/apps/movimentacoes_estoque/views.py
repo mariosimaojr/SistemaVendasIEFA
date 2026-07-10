@@ -30,6 +30,7 @@ def criar(request):
         if form.is_valid():
 
             movimentacao = form.save(commit=False)
+            movimentacao.usuario = request.usuario_logado
 
             if not movimentacao.data_movimento:
                 movimentacao.data_movimento = timezone.now()

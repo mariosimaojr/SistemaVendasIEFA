@@ -52,7 +52,6 @@ def criar(request):
         if form.is_valid():
 
             estoque_inicial = form.cleaned_data['estoque_inicial']
-            usuario_estoque = form.cleaned_data['usuario_estoque']
 
             with transaction.atomic():
 
@@ -66,7 +65,7 @@ def criar(request):
                         quantidade=estoque_inicial,
                         data_movimento=timezone.now(),
                         observacao='Estoque inicial informado no cadastro do produto.',
-                        usuario=usuario_estoque,
+                        usuario=request.usuario_logado,
                         tipo_movimento='ENTRADA'
                     )
 
