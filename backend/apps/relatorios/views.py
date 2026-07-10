@@ -141,9 +141,9 @@ def codigo_barras(request):
                 buffer,
                 options={
                     'write_text': False,
-                    'module_width': 0.25,
-                    'module_height': 9.0,
-                    'quiet_zone': 2.0,
+                    'module_width': 0.18,
+                    'module_height': 10.0,
+                    'quiet_zone': 1.0,
                 }
             )
 
