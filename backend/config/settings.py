@@ -51,6 +51,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    
     'django.contrib.sessions.middleware.SessionMiddleware',
     'apps.usuarios.middleware.UsuarioLogadoMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -141,6 +143,8 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 MIGRATION_MODULES = {
     'categorias': None,
     'formaspagamento': None,
@@ -150,4 +154,14 @@ MIGRATION_MODULES = {
     'vendas': None,
     'pdv': None,
     
+}
+
+# armazenamento dos estáticos (WhiteNoise)
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
 }
