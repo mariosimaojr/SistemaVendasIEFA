@@ -124,19 +124,60 @@
         text-align: center;
     }
 
-    .pdv-finalizar {
+    .pdv-actions {
+        display: grid;
+        gap: 8px;
+    }
+
+    .pdv-secondary-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .pdv-finalizar,
+    .pdv-remover,
+    .pdv-cancelar {
         width: 100%;
-        height: 88px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .pdv-finalizar {
+        height: 72px;
         border: 1px solid #004f93;
         background: #0875c9;
         color: white;
-        cursor: pointer;
-        font-size: 27px;
-        font-weight: bold;
+        font-size: 25px;
     }
 
     .pdv-finalizar:hover {
         background: #075ea1;
+    }
+
+    .pdv-remover,
+    .pdv-cancelar {
+        min-height: 48px;
+        border: 1px solid #1f2937;
+        font-size: 16px;
+    }
+
+    .pdv-remover {
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    .pdv-remover:hover {
+        background: #e5e7eb;
+    }
+
+    .pdv-cancelar {
+        background: #fee2e2;
+        color: #7f1d1d;
+    }
+
+    .pdv-cancelar:hover {
+        background: #fecaca;
     }
 
     .pdv-overlay {
@@ -215,6 +256,49 @@
         color: #111827;
     }
 
+    .pdv-remocao-lista {
+        display: grid;
+        gap: 10px;
+        max-height: min(420px, calc(100vh - 260px));
+        margin: 18px 0 24px;
+        overflow: auto;
+    }
+
+    .pdv-remocao-item {
+        display: grid;
+        grid-template-columns: 1fr 150px;
+        gap: 12px;
+        align-items: center;
+        border: 1px solid #d1d5db;
+        padding: 10px;
+    }
+
+    .pdv-remocao-nome {
+        margin-bottom: 6px;
+        font-size: 20px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .pdv-remocao-detalhe {
+        color: #374151;
+        font-size: 16px;
+    }
+
+    .pdv-remocao-botao {
+        min-height: 46px;
+        border: 1px solid #7f1d1d;
+        background: #dc2626;
+        color: white;
+        cursor: pointer;
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+    .pdv-remocao-botao:hover {
+        background: #b91c1c;
+    }
+
     @media (max-width: 820px) {
         .pdv-toolbar,
         .pdv-produto-grid,
@@ -224,6 +308,11 @@
 
         .pdv-finalizar {
             height: 72px;
+        }
+
+        .pdv-secondary-actions,
+        .pdv-remocao-item {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -283,9 +372,19 @@
                 <div id="pdv-total-venda" class="pdv-total-valor">0,00</div>
             </div>
 
-            <button id="pdv-abrir-finalizacao" class="pdv-finalizar" type="button">
-                FINALIZAR VENDA [F4]
-            </button>
+            <div class="pdv-actions">
+                <button id="pdv-abrir-finalizacao" class="pdv-finalizar" type="button">
+                    FINALIZAR VENDA [F4]
+                </button>
+                <div class="pdv-secondary-actions">
+                    <button id="pdv-abrir-remocao" class="pdv-remover" type="button">
+                        REMOVER PRODUTO [F8]
+                    </button>
+                    <button id="pdv-cancelar-venda" class="pdv-cancelar" type="button">
+                        CANCELAR VENDA [F9]
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div id="pdv-modal" class="pdv-overlay" aria-hidden="true">
@@ -313,6 +412,22 @@
                 </div>
             </div>
         </div>
+
+        <div id="pdv-remocao-modal" class="pdv-overlay" aria-hidden="true">
+            <div class="pdv-modal" role="dialog" aria-modal="true" aria-labelledby="pdv-remocao-titulo">
+                <label id="pdv-remocao-titulo">
+                    Remover Produto
+                </label>
+
+                <div id="pdv-remocao-lista" class="pdv-remocao-lista"></div>
+
+                <div class="pdv-modal-actions">
+                    <button id="pdv-remocao-voltar" class="pdv-modal-voltar" type="button">
+                        VOLTAR
+                    </button>
+                </div>
+            </div>
+        </div>
     </form>
 </div>
 
@@ -327,7 +442,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const cupom = document.getElementById('pdv-cupom');
     const totalVenda = document.getElementById('pdv-total-venda');
     const abrirFinalizacao = document.getElementById('pdv-abrir-finalizacao');
+    const abrirRemocao = document.getElementById('pdv-abrir-remocao');
+    const cancelarVenda = document.getElementById('pdv-cancelar-venda');
     const modal = document.getElementById('pdv-modal');
+    const remocaoModal = document.getElementById('pdv-remocao-modal');
+    const remocaoLista = document.getElementById('pdv-remocao-lista');
+    const remocaoVoltar = document.getElementById('pdv-remocao-voltar');
     const finalizar = document.getElementById('pdv-finalizar');
     const voltar = document.getElementById('pdv-voltar');
     const inlineMessage = document.getElementById('pdv-inline-message');
@@ -403,6 +523,151 @@ document.addEventListener('DOMContentLoaded', function () {
         cupom.scrollTop = cupom.scrollHeight;
     }
 
+    function fecharModalFinalizacao() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        codigoInput.focus();
+    }
+
+    function fecharModalRemocao() {
+        remocaoModal.classList.remove('is-open');
+        remocaoModal.setAttribute('aria-hidden', 'true');
+        codigoInput.focus();
+    }
+
+    function focarTelaAtual() {
+        if (remocaoModal.classList.contains('is-open')) {
+            const primeiroBotao = remocaoLista.querySelector('button');
+
+            if (primeiroBotao) {
+                primeiroBotao.focus();
+                return;
+            }
+        }
+
+        if (modal.classList.contains('is-open')) {
+            const formaSelecionada = formaPagamentoRadios.find(radio => radio.checked);
+            const formaParaFocar = formaSelecionada || formaPagamentoRadios[0];
+
+            if (formaParaFocar) {
+                formaParaFocar.focus();
+                return;
+            }
+        }
+
+        codigoInput.focus();
+    }
+
+    function renderizarListaRemocao() {
+        remocaoLista.innerHTML = '';
+
+        itens.forEach(item => {
+            const subtotal = item.quantidade * item.preco_venda;
+
+            const linha = document.createElement('div');
+            linha.className = 'pdv-remocao-item';
+
+            const dados = document.createElement('div');
+
+            const nome = document.createElement('div');
+            nome.className = 'pdv-remocao-nome';
+            nome.textContent = item.nome;
+
+            const detalhe = document.createElement('div');
+            detalhe.className = 'pdv-remocao-detalhe';
+            detalhe.textContent = 'Qtd: ' + item.quantidade
+                + ' | Unit.: R$ ' + formatarNumero(item.preco_venda)
+                + ' | Subtotal: R$ ' + formatarNumero(subtotal);
+
+            const botao = document.createElement('button');
+            botao.className = 'pdv-remocao-botao';
+            botao.type = 'button';
+            botao.textContent = 'REMOVER 1';
+            botao.addEventListener('click', function () {
+                removerUmaUnidade(item.produto_id);
+            });
+
+            dados.appendChild(nome);
+            dados.appendChild(detalhe);
+            linha.appendChild(dados);
+            linha.appendChild(botao);
+            remocaoLista.appendChild(linha);
+        });
+    }
+
+    function abrirModalRemocao() {
+        limparMensagem();
+
+        if (itens.size === 0) {
+            mostrarMensagem('Nao ha itens para remover.');
+            codigoInput.focus();
+            return;
+        }
+
+        fecharModalFinalizacao();
+        renderizarListaRemocao();
+        remocaoModal.classList.add('is-open');
+        remocaoModal.setAttribute('aria-hidden', 'false');
+
+        const primeiroBotao = remocaoLista.querySelector('button');
+        if (primeiroBotao) {
+            primeiroBotao.focus();
+        }
+    }
+
+    function removerUmaUnidade(produtoId) {
+        const item = itens.get(produtoId);
+
+        if (!item) {
+            renderizarListaRemocao();
+            return;
+        }
+
+        if (item.quantidade <= 1) {
+            itens.delete(produtoId);
+        } else {
+            item.quantidade -= 1;
+        }
+
+        renderizarCupom();
+
+        if (itens.size === 0) {
+            fecharModalRemocao();
+            mostrarMensagem('Produto removido. Venda sem itens.');
+            return;
+        }
+
+        renderizarListaRemocao();
+
+        const primeiroBotao = remocaoLista.querySelector('button');
+        if (primeiroBotao) {
+            primeiroBotao.focus();
+        }
+    }
+
+    function cancelarVendaAtual() {
+        limparMensagem();
+
+        if (itens.size === 0) {
+            mostrarMensagem('Nao ha venda em andamento para cancelar.');
+            codigoInput.focus();
+            return;
+        }
+
+        const confirmar = window.confirm('Confirma o cancelamento da venda atual?');
+
+        if (!confirmar) {
+            focarTelaAtual();
+            return;
+        }
+
+        itens.clear();
+        renderizarCupom();
+        fecharModalRemocao();
+        fecharModalFinalizacao();
+        codigoInput.focus();
+    }
+
     async function buscarProduto() {
         const codigo = codigoInput.value.trim();
 
@@ -456,6 +721,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        fecharModalRemocao();
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
 
@@ -467,12 +733,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function fecharModalFinalizacao() {
-        modal.classList.remove('is-open');
-        modal.setAttribute('aria-hidden', 'true');
-        codigoInput.focus();
-    }
-
     codigoInput.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -482,7 +742,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     codigoInput.addEventListener('change', buscarProduto);
     abrirFinalizacao.addEventListener('click', abrirModalFinalizacao);
+    abrirRemocao.addEventListener('click', abrirModalRemocao);
+    cancelarVenda.addEventListener('click', cancelarVendaAtual);
     voltar.addEventListener('click', fecharModalFinalizacao);
+    remocaoVoltar.addEventListener('click', fecharModalRemocao);
 
     document.addEventListener('keydown', function (event) {
         if (event.key === 'F4') {
@@ -490,8 +753,25 @@ document.addEventListener('DOMContentLoaded', function () {
             abrirModalFinalizacao();
         }
 
-        if (event.key === 'Escape' && modal.classList.contains('is-open')) {
-            fecharModalFinalizacao();
+        if (event.key === 'F8') {
+            event.preventDefault();
+            abrirModalRemocao();
+        }
+
+        if (event.key === 'F9') {
+            event.preventDefault();
+            cancelarVendaAtual();
+        }
+
+        if (event.key === 'Escape') {
+            if (remocaoModal.classList.contains('is-open')) {
+                fecharModalRemocao();
+                return;
+            }
+
+            if (modal.classList.contains('is-open')) {
+                fecharModalFinalizacao();
+            }
         }
 
         if (event.key === 'Enter' && modal.classList.contains('is-open')) {
