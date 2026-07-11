@@ -1,6 +1,9 @@
 USE `controle_vendas_iefa`;
 SET NAMES utf8mb4;
 
+-- Disable safe updates for the current session
+SET SQL_SAFE_UPDATES = 0;
+
 START TRANSACTION;
 
 INSERT INTO `usuarios` (
@@ -14,7 +17,7 @@ INSERT INTO `usuarios` (
 SELECT
     'loja',
     'loja@iefa.local',
-    'd6ea442480377983b42ce1424acd26caf3593045',
+    'fb70259fede1321f31bf1a52ea5216dea2449e27',
     'Administrador',
     1,
     NOW()
@@ -27,7 +30,7 @@ WHERE NOT EXISTS (
 UPDATE `usuarios`
 SET
     `EMAIL` = 'loja@iefa.local',
-    `SENHA_HASH` = 'd6ea442480377983b42ce1424acd26caf3593045',
+    `SENHA_HASH` = 'fb70259fede1321f31bf1a52ea5216dea2449e27',
     `PERFIL` = 'Administrador',
     `ATIVO` = 1
 WHERE `LOGIN_ACESSO` = 'loja';
