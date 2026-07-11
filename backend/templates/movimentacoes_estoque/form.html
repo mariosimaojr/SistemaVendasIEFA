@@ -1,5 +1,35 @@
 {% extends 'base.html' %}
 
+{% block style %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<style>
+    .produto-select-wrapper {
+        display: block;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .produto-select-wrapper .select2-container {
+        max-width: 500px;
+    }
+
+    .produto-select-wrapper .select2-container .select2-selection--single {
+        height: 35px;
+        border: 1px solid #767676;
+        border-radius: 2px;
+        box-sizing: border-box;
+    }
+
+    .produto-select-wrapper .select2-container .select2-selection--single .select2-selection__rendered {
+        line-height: 33px;
+    }
+
+    .produto-select-wrapper .select2-container .select2-selection--single .select2-selection__arrow {
+        height: 33px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <h2>{{ titulo }}</h2>
@@ -15,7 +45,9 @@
 
     <p>
         Produto:<br>
-        {{ form.produto }}
+        <span class="produto-select-wrapper">
+            {{ form.produto }}
+        </span>
         {% if form.produto.errors %}
             <br><span style="color:red;">{{ form.produto.errors }}</span>
         {% endif %}
@@ -56,5 +88,21 @@
     <button type="submit" class="btn-save">Salvar</button>
     <a href="{% url 'movimentacoes_estoque:lista' %}" class="btn-cancel">Cancelar</a>
 </form>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(function () {
+        $('#id_produto').select2({
+            placeholder: 'Selecione ou pesquise um produto',
+            width: '100%',
+            language: {
+                noResults: function () {
+                    return 'Nenhum produto encontrado';
+                }
+            }
+        });
+    });
+</script>
 
 {% endblock %}

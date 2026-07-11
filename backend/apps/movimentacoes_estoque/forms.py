@@ -44,7 +44,7 @@ class MovimentacaoEstoqueForm(forms.ModelForm):
 
         widgets = {
             'produto': forms.Select(
-                attrs={'class': 'form-control'}
+                attrs={'class': 'form-control produto-select-pesquisavel'}
             ),
             'quantidade': forms.NumberInput(
                 attrs={'class': 'form-control'}
