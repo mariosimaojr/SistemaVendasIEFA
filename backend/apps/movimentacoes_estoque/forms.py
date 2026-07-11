@@ -4,6 +4,25 @@ from .models import MovimentacaoEstoque
 
 class MovimentacaoEstoqueForm(forms.ModelForm):
 
+    data_movimento = forms.DateTimeField(
+        label='Data do Movimento',
+        input_formats=['%Y-%m-%dT%H:%M'],
+        widget=forms.DateTimeInput(
+            format='%Y-%m-%dT%H:%M',
+            attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }
+        )
+    )
+
+    tipo_movimento = forms.ChoiceField(
+        label='Tipo de Movimento',
+        choices=MovimentacaoEstoque.TIPO_MOVIMENTO_CHOICES,
+        widget=forms.RadioSelect(),
+        required=True
+    )
+
     class Meta:
         model = MovimentacaoEstoque
 
@@ -29,12 +48,6 @@ class MovimentacaoEstoqueForm(forms.ModelForm):
             ),
             'quantidade': forms.NumberInput(
                 attrs={'class': 'form-control'}
-            ),
-            'data_movimento': forms.DateTimeInput(
-                attrs={
-                    'class': 'form-control',
-                    'type': 'datetime-local'
-                }
             ),
             'observacao': forms.Textarea(
                 attrs={
