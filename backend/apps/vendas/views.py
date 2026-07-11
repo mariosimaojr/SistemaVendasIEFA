@@ -39,6 +39,7 @@ def criar(request):
         if form.is_valid() and formset.is_valid():
 
             venda = form.save(commit=False)
+            venda.usuario = request.usuario_logado
             venda.valor_total = Decimal('0.00')
             venda.save()
 

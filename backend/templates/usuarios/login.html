@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Sistema de Controle de Vendas</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f4f4;
+            background-image: url("{% static 'img/fundo_loja_cefa_iefa.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .login-box {
+            width: 450px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 28px;
+            box-sizing: border-box;
+        }
+
+        .login-logo {
+            display: block;
+            width: 150px;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 18px;
+        }
+
+        h1 {
+            margin: 0 0 24px;
+            font-size: 26px;
+            line-height: 1.2;
+            text-align: center;
+            color: #1f2937;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 9px;
+            box-sizing: border-box;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .error {
+            margin-bottom: 16px;
+            color: #b91c1c;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            background-color: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <img src="{% static 'img/logo_cefa_iefa.png' %}" alt="Logo CEFA IEFA" class="login-logo">
+        <h1>Sistema de Controle de Vendas</h1>
+
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+
+            {% if form.non_field_errors %}
+                <div class="error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="field">
+                <label for="{{ form.login_acesso.id_for_label }}">Login</label>
+                {{ form.login_acesso }}
+                {% if form.login_acesso.errors %}
+                    <div class="error">{{ form.login_acesso.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="field">
+                <label for="{{ form.senha.id_for_label }}">Senha</label>
+                {{ form.senha }}
+                {% if form.senha.errors %}
+                    <div class="error">{{ form.senha.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+</body>
+</html>

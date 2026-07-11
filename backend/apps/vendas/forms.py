@@ -20,22 +20,17 @@ class VendaForm(forms.ModelForm):
         model = Venda
         fields = [
             'data_venda',
-            'usuario',
             'forma_pagamento',
             'observacao',
         ]
 
         labels = {
             'data_venda': 'Data da Venda',
-            'usuario': 'Usuário',
             'forma_pagamento': 'Forma de Pagamento',
-            'observacao': 'Observação',
+            'observacao': 'Observacao',
         }
 
         widgets = {
-            'usuario': forms.Select(
-                attrs={'class': 'form-control'}
-            ),
             'forma_pagamento': forms.Select(
                 attrs={'class': 'form-control'}
             ),
@@ -59,16 +54,16 @@ class VendaItemForm(forms.ModelForm):
         ]
 
         labels = {
-            'produto': 'Código de Barras',
+            'produto': 'Codigo de Barras',
             'quantidade': 'Quantidade',
-            'preco_unitario': 'Preço Unitário',
+            'preco_unitario': 'Preco Unitario',
         }
 
         widgets = {
             'produto': forms.NumberInput(
                 attrs={
                     'class': 'form-control codigo-produto-input',
-                    'placeholder': 'Código do produto'
+                    'placeholder': 'Codigo do produto'
                 }
             ),
             'quantidade': forms.NumberInput(
@@ -81,7 +76,7 @@ class VendaItemForm(forms.ModelForm):
                 attrs={
                     'class': 'form-control preco-unitario-input',
                     'step': '0.01',
-                    'placeholder': 'Preço'
+                    'placeholder': 'Preco'
                 }
             ),
         }
@@ -95,7 +90,7 @@ class VendaItemForm(forms.ModelForm):
     def clean_preco_unitario(self):
         preco = self.cleaned_data.get('preco_unitario')
         if preco is None or preco <= 0:
-            raise forms.ValidationError('Informe um preço unitário maior que zero.')
+            raise forms.ValidationError('Informe um preco unitario maior que zero.')
         return preco
 
 
@@ -127,6 +122,7 @@ class BaseVendaItemFormSet(forms.BaseInlineFormSet):
 
         if not tem_item:
             raise forms.ValidationError('Informe pelo menos um item para a venda.')
+
 
 def criar_venda_item_formset(extra=3):
     return inlineformset_factory(

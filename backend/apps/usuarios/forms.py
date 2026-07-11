@@ -2,6 +2,26 @@ from django import forms
 from .models import Usuario
 
 
+class LoginForm(forms.Form):
+
+    login_acesso = forms.CharField(
+        label='Login',
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'autofocus': 'autofocus'
+            }
+        )
+    )
+
+    senha = forms.CharField(
+        label='Senha',
+        widget=forms.PasswordInput(
+            attrs={'class': 'form-control'}
+        )
+    )
+
+
 class UsuarioForm(forms.ModelForm):
 
     PERFIL_CHOICES = [

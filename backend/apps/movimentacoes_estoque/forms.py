@@ -4,6 +4,25 @@ from .models import MovimentacaoEstoque
 
 class MovimentacaoEstoqueForm(forms.ModelForm):
 
+    data_movimento = forms.DateTimeField(
+        label='Data do Movimento',
+        input_formats=['%Y-%m-%dT%H:%M'],
+        widget=forms.DateTimeInput(
+            format='%Y-%m-%dT%H:%M',
+            attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }
+        )
+    )
+
+    tipo_movimento = forms.ChoiceField(
+        label='Tipo de Movimento',
+        choices=MovimentacaoEstoque.TIPO_MOVIMENTO_CHOICES,
+        widget=forms.RadioSelect(),
+        required=True
+    )
+
     class Meta:
         model = MovimentacaoEstoque
 
@@ -12,7 +31,6 @@ class MovimentacaoEstoqueForm(forms.ModelForm):
             'quantidade',
             'data_movimento',
             'observacao',
-            'usuario',
             'tipo_movimento',
         ]
 
@@ -20,32 +38,22 @@ class MovimentacaoEstoqueForm(forms.ModelForm):
             'produto': 'Produto',
             'quantidade': 'Quantidade',
             'data_movimento': 'Data do Movimento',
-            'observacao': 'Observação',
-            'usuario': 'Usuário',
+            'observacao': 'Observacao',
             'tipo_movimento': 'Tipo de Movimento',
         }
 
         widgets = {
             'produto': forms.Select(
-                attrs={'class': 'form-control'}
+                attrs={'class': 'form-control produto-select-pesquisavel'}
             ),
             'quantidade': forms.NumberInput(
                 attrs={'class': 'form-control'}
-            ),
-            'data_movimento': forms.DateTimeInput(
-                attrs={
-                    'class': 'form-control',
-                    'type': 'datetime-local'
-                }
             ),
             'observacao': forms.Textarea(
                 attrs={
                     'class': 'form-control',
                     'rows': 4
                 }
-            ),
-            'usuario': forms.Select(
-                attrs={'class': 'form-control'}
             ),
             'tipo_movimento': forms.RadioSelect(),
         }
@@ -67,6 +75,6 @@ class MovimentacaoEstoqueForm(forms.ModelForm):
         observacao = self.cleaned_data.get('observacao')
 
         if not observacao or not observacao.strip():
-            raise forms.ValidationError('Informe a observação.')
+            raise forms.ValidationError('Informe a observacao.')
 
         return observacao.strip()

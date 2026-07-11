@@ -39,7 +39,12 @@ def caixa(request):
                     'Produto nao encontrado ou inativo: ' + ', '.join(produtos_faltantes)
                 )
             else:
-                venda = _salvar_venda_pdv(form, itens, produtos)
+                venda = _salvar_venda_pdv(
+                    form,
+                    itens,
+                    produtos,
+                    request.usuario_logado
+                )
 
                 messages.success(
                     request,
@@ -108,11 +113,11 @@ def _agrupar_itens(itens):
 
 
 @transaction.atomic
-def _salvar_venda_pdv(form, itens, produtos):
+def _salvar_venda_pdv(form, itens, produtos, usuario_logado):
 
     venda = Venda.objects.create(
         data_venda=timezone.localdate(),
-        usuario=form.cleaned_data['usuario'],
+        usuario=usuario_logado,
         forma_pagamento=form.cleaned_data['forma_pagamento'],
         valor_total=Decimal('0.00'),
         observacao=None

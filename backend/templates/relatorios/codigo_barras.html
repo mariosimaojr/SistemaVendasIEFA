@@ -1,5 +1,6 @@
 <!-- templates/relatorios/codigo_barras.html -->
 {% extends 'base.html' %}
+{% load static %}
 
 {% block style %}
 <style>
@@ -75,18 +76,21 @@
 
         .etiquetas-a4 {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8mm 8mm;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 4mm 4mm;
             width: 190mm;
             margin: 0 auto;
         }
 
         .etiqueta {
             border: 1px solid #bbb;
+            width: 100%;
+            min-width: 0;
             min-height: 42mm;
-            padding: 4mm;
+            padding: 2mm;
             box-sizing: border-box;
             text-align: center;
+            overflow: hidden;
             page-break-inside: avoid;
             break-inside: avoid;
             display: flex;
@@ -95,33 +99,43 @@
             background: white;
         }
 
+        .etiqueta-logo {
+            display: block;
+            height: 9mm;
+            max-width: 28mm;
+            margin: 0 auto 1mm;
+            object-fit: contain;
+        }
+
         .etiqueta-nome {
-            font-size: 12px;
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            font-size: 11px;
             font-weight: bold;
             line-height: 1.2;
-            min-height: 28px;
+            min-height: auto;
+            white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .etiqueta-barcode {
-            margin: 4px 0;
+            margin: 1mm 0;
         }
 
         .etiqueta-barcode img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .etiqueta-codigo {
-            font-size: 12px;
-            letter-spacing: 2px;
-            margin-top: 2px;
+            width: 38mm;
+            height: 15mm;
+            object-fit: contain;
         }
 
         .etiqueta-preco {
-            font-size: 22.4px;
+            font-size: 16px;
             font-weight: bold;
-            margin-top: 4px;
+            margin-top: 1mm;
         }
 
         @media print {
@@ -151,7 +165,7 @@
 
             .etiquetas-a4 {
                 width: 100%;
-                gap: 6mm 6mm;
+                gap: 4mm 4mm;
             }
 
             .etiqueta {
@@ -163,6 +177,12 @@
     <div class="etiquetas-a4">
         {% for etiqueta in etiquetas %}
             <div class="etiqueta">
+                <img
+                    src="{% static 'img/logo_cefa_iefa.png' %}"
+                    class="etiqueta-logo"
+                    alt="Logo CEFA IEFA"
+                >
+
                 <div class="etiqueta-nome">
                     {{ etiqueta.codigo }} - {{ etiqueta.nome_produto }}
                 </div>
@@ -178,6 +198,14 @@
         {% endfor %}
     </div>
 
+{% endif %}
+
+{% if auto_print and produto %}
+    <script>
+    window.addEventListener('load', function () {
+        window.print();
+    });
+    </script>
 {% endif %}
 
 {% endblock %}

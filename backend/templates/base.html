@@ -11,11 +11,25 @@
         }
 
         .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             background-color: #1f2937;
             color: white;
             padding: 20px 30px;
             font-size: 32px;
             font-weight: bold;
+        }
+
+        .header-user {
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .header-user a {
+            color: white;
+            font-weight: bold;
+            margin-left: 12px;
         }
 
         .container {
@@ -197,7 +211,16 @@
 <body>
 
     <div class="header">
-        Sistema de Controle de Vendas
+        <div>
+            Sistema de Controle de Vendas
+        </div>
+
+        {% if request.usuario_logado %}
+            <div class="header-user">
+                {{ request.usuario_logado.login_acesso }}
+                <a href="{% url 'logout' %}">Sair</a>
+            </div>
+        {% endif %}
     </div>
 
     <div class="container">
