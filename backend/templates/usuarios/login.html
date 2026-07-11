@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -12,10 +13,14 @@
             justify-content: center;
             font-family: Arial, Helvetica, sans-serif;
             background-color: #f4f4f4;
+            background-image: url("{% static 'img/fundo_loja_cefa_iefa.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .login-box {
-            width: 360px;
+            width: 450px;
             background: white;
             border: 1px solid #d1d5db;
             border-radius: 8px;
@@ -23,16 +28,20 @@
             box-sizing: border-box;
         }
 
-        h1 {
-            margin: 0 0 6px;
-            font-size: 26px;
-            color: #1f2937;
+        .login-logo {
+            display: block;
+            width: 150px;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 18px;
         }
 
-        h2 {
+        h1 {
             margin: 0 0 24px;
-            font-size: 18px;
-            color: #4b5563;
+            font-size: 26px;
+            line-height: 1.2;
+            text-align: center;
+            color: #1f2937;
         }
 
         label {
@@ -76,8 +85,8 @@
 </head>
 <body>
     <div class="login-box">
+        <img src="{% static 'img/logo_cefa_iefa.png' %}" alt="Logo CEFA IEFA" class="login-logo">
         <h1>Sistema de Controle de Vendas</h1>
-        <h2>Login</h2>
 
         <form method="post">
             {% csrf_token %}
