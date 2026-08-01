@@ -5,6 +5,15 @@ from django.utils import timezone
 from apps.produtos.models import Produto
 
 
+class ProdutoCodigoBarrasChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, produto):
+
+        codigo = str(produto.sequencia).zfill(6)
+
+        return f'{codigo} - {produto.nome}'
+
+
 class RelatorioVendasFormaPagamentoForm(forms.Form):
 
     data_inicial = forms.DateField(
@@ -53,11 +62,12 @@ class RelatorioVendasFormaPagamentoForm(forms.Form):
     
 class RelatorioCodigoBarrasForm(forms.Form):
 
-    produto = forms.ModelChoiceField(
+    produto = ProdutoCodigoBarrasChoiceField(
         label='Produto',
         queryset=Produto.objects.filter(ativo=True).order_by('nome'),
+        empty_label='',
         widget=forms.Select(
-            attrs={'class': 'form-control'}
+            attrs={'class': 'form-control produto-select-pesquisavel'}
         )
     )
 

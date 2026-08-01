@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
-from django.db.models import Q, Sum
-from django.db.models.functions import Coalesce
+from django.db.models import CharField, Q, Sum
+from django.db.models.functions import Cast, Coalesce
 from django.urls import reverse
 from django.utils import timezone
 
@@ -16,6 +16,10 @@ def lista(request):
     q = request.GET.get('q', '').strip()
 
     produtos = Produto.objects.select_related('categoria').annotate(
+        sequencia_texto=Cast(
+            'sequencia',
+            output_field=CharField()
+        ),
         estoque_atual=Coalesce(
             Sum('movimentacaoestoque__quantidade'),
             0
@@ -23,10 +27,18 @@ def lista(request):
     )
 
     if q:
-        produtos = produtos.filter(
+        filtros = (
+            Q(sequencia_texto__icontains=q) |
             Q(nome__icontains=q) |
-            Q(categoria__nome__icontains=q)
+            Q(descricao__icontains=q) |
+            Q(categoria__nome__icontains=q) |
+            Q(categoria__descricao__icontains=q)
         )
+
+        if q.isdigit():
+            filtros |= Q(sequencia=int(q))
+
+        produtos = produtos.filter(filtros)
 
     return render(
         request,
@@ -41,6 +53,7 @@ def lista(request):
 def criar(request):
 
     produto_criado = request.GET.get('produto_criado')
+    quantidade_etiquetas = request.GET.get('quantidade_etiquetas') or 1
 
     if request.method == 'POST':
 
@@ -52,6 +65,7 @@ def criar(request):
         if form.is_valid():
 
             estoque_inicial = form.cleaned_data['estoque_inicial']
+            quantidade_etiquetas = max(estoque_inicial, 1)
 
             with transaction.atomic():
 
@@ -70,7 +84,11 @@ def criar(request):
                     )
 
             return redirect(
-                f"{reverse('produtos:novo')}?produto_criado={produto.sequencia}"
+                (
+                    f"{reverse('produtos:novo')}"
+                    f"?produto_criado={produto.sequencia}"
+                    f"&quantidade_etiquetas={quantidade_etiquetas}"
+                )
             )
 
     else:
@@ -85,7 +103,8 @@ def criar(request):
         {
             'form': form,
             'titulo': 'Novo Produto',
-            'produto_criado': produto_criado
+            'produto_criado': produto_criado,
+            'quantidade_etiquetas': quantidade_etiquetas
         }
     )
 

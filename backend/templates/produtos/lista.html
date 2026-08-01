@@ -11,7 +11,14 @@
 
     <form method="get" style="display: flex; align-items: center; gap: 10px; margin: 0;">
         <label for="q">Pesquisa</label>
-        <input type="text" id="q" name="q" value="{{ q }}" style="width: 350px;">
+        <input
+            type="text"
+            id="q"
+            name="q"
+            value="{{ q }}"
+            placeholder="Código, produto, descrição ou categoria"
+            style="width: 350px;"
+        >
         <button type="submit" class="btn-save">
             Localizar
         </button>

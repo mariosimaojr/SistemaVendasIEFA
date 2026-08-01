@@ -1,8 +1,29 @@
 from django import forms
+
+from apps.produtos.models import Produto
+
 from .models import MovimentacaoEstoque
 
 
+class ProdutoMovimentacaoChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, produto):
+
+        codigo = str(produto.sequencia).zfill(6)
+
+        return f'{codigo} - {produto.nome}'
+
+
 class MovimentacaoEstoqueForm(forms.ModelForm):
+
+    produto = ProdutoMovimentacaoChoiceField(
+        label='Produto',
+        queryset=Produto.objects.all().order_by('nome'),
+        empty_label='',
+        widget=forms.Select(
+            attrs={'class': 'form-control produto-select-pesquisavel'}
+        )
+    )
 
     data_movimento = forms.DateTimeField(
         label='Data do Movimento',

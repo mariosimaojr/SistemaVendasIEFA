@@ -4,20 +4,35 @@
 
 <h2>Movimentações de Estoque</h2>
 
-<a href="{% url 'movimentacoes_estoque:novo' %}" class="btn-link">
-    Nova Movimentação
-</a>
+<div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px;">
+    <a href="{% url 'movimentacoes_estoque:novo' %}" class="btn-link" style="margin-bottom: 0;">
+        Nova Movimentação
+    </a>
+
+    <form method="get" style="display: flex; align-items: center; gap: 10px; margin: 0;">
+        <label for="q">Pesquisa</label>
+        <input
+            type="text"
+            id="q"
+            name="q"
+            value="{{ q }}"
+            placeholder="Sequência, ID, produto, descrição ou categoria"
+            style="width: 350px;"
+        >
+        <button type="submit" class="btn-save">
+            Localizar
+        </button>
+    </form>
+</div>
 
 <table>
     <thead>
         <tr>
+            <th>Sequência</th>
+            <th style="min-width: 125px; white-space: nowrap;">Data</th>
             <th>ID</th>
-            <th>Produto</th>
+            <th>Nome</th>
             <th>Quantidade</th>
-            <th>Data</th>
-            <th>Usuário</th>
-            <th>Tipo</th>
-            <th>Observação</th>
             <th>Ações</th>
         </tr>
     </thead>
@@ -25,8 +40,9 @@
         {% for movimentacao in movimentacoes %}
         <tr>
             <td>{{ movimentacao.sequencia }}</td>
+            <td style="min-width: 125px; white-space: nowrap;">{{ movimentacao.data_movimento|date:"d/m/Y H:i" }}</td>
+            <td>{{ movimentacao.produto.sequencia }}</td>
             <td>{{ movimentacao.produto.nome }}</td>
-
             <td>
                 {% if movimentacao.tipo_movimento == 'ENTRADA' %}
                     <span style="color: green; font-weight: bold;">
@@ -38,24 +54,6 @@
                     </span>
                 {% endif %}
             </td>
-
-            <td>{{ movimentacao.data_movimento }}</td>
-            <td>{{ movimentacao.usuario.login_acesso }}</td>
-
-            <td>
-                {% if movimentacao.tipo_movimento == 'ENTRADA' %}
-                    <span style="color: green; font-weight: bold;">
-                        Entrada
-                    </span>
-                {% else %}
-                    <span style="color: red; font-weight: bold;">
-                        Saída
-                    </span>
-                {% endif %}
-            </td>
-
-            <td>{{ movimentacao.observacao }}</td>
-
             <td>
                 <a href="{% url 'movimentacoes_estoque:editar' movimentacao.sequencia %}" class="btn-action btn-edit">
                     Editar
@@ -64,12 +62,12 @@
                     class="btn-action btn-delete"
                     onclick="return confirm('Confirma a exclusão da movimentação?');">
                     Excluir
-                </a>            
+                </a>
             </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="8">Nenhuma movimentação cadastrada.</td>
+            <td colspan="6">Nenhuma movimentação cadastrada.</td>
         </tr>
         {% endfor %}
     </tbody>
