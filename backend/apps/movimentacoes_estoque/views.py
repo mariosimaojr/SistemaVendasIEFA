@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import CharField, Q
+from django.db.models.functions import Cast
 from django.utils import timezone
 
 from .models import MovimentacaoEstoque
@@ -7,16 +9,46 @@ from .forms import MovimentacaoEstoqueForm
 
 def lista(request):
 
+    q = request.GET.get('q', '').strip()
+
     movimentacoes = MovimentacaoEstoque.objects.select_related(
         'produto',
-        'usuario'
-    ).all()
+        'produto__categoria'
+    ).annotate(
+        sequencia_texto=Cast(
+            'sequencia',
+            output_field=CharField()
+        ),
+        produto_sequencia_texto=Cast(
+            'produto__sequencia',
+            output_field=CharField()
+        )
+    ).order_by('-sequencia')
+
+    if q:
+        filtros = (
+            Q(sequencia_texto__icontains=q) |
+            Q(produto_sequencia_texto__icontains=q) |
+            Q(produto__nome__icontains=q) |
+            Q(produto__descricao__icontains=q) |
+            Q(produto__categoria__nome__icontains=q) |
+            Q(produto__categoria__descricao__icontains=q)
+        )
+
+        if q.isdigit():
+            filtros |= (
+                Q(sequencia=int(q)) |
+                Q(produto__sequencia=int(q))
+            )
+
+        movimentacoes = movimentacoes.filter(filtros)
 
     return render(
         request,
         'movimentacoes_estoque/lista.html',
         {
-            'movimentacoes': movimentacoes
+            'movimentacoes': movimentacoes,
+            'q': q
         }
     )
 
