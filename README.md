@@ -11,6 +11,7 @@ O projeto está organizado como uma aplicação Django dentro da pasta `backend`
 - MySQL
 - HTML e CSS em templates Django
 - JavaScript pontual em templates
+- WhiteNoise para servir arquivos estáticos
 - Git e GitHub
 - Ambiente virtual Python (`venv`)
 
@@ -21,6 +22,7 @@ As dependências Python do projeto estão listadas em `requirements.txt`:
 - `python-barcode`
 - `pillow`
 - `python-dotenv`
+- `whitenoise`
 - dependências de suporte como `asgiref`, `sqlparse` e `tzdata`
 
 ## Estrutura do projeto
@@ -33,10 +35,13 @@ SistemaVendasIEFA/
 ├── BD/
 │   ├── 00 - Cria BD controle_vendas_iefa.sql
 │   ├── 01 - Ajustes BD controle_vendas_iefa.sql
-│   └── 02 - Correções BD controle_vendas_iefa.sql
+│   ├── 02 - Correções BD controle_vendas_iefa.sql
+│   ├── 03 - Carga inventario CEFA.sql
+│   ├── 04 - Cria usuario loja.sql
+│   └── gerar_carga_inventario_cefa.py
 └── backend/
     ├── manage.py
-    ├── venv/
+    ├── venv/                  # ambiente local, ignorado pelo Git
     ├── config/
     │   ├── settings.py
     │   ├── urls.py
@@ -47,6 +52,7 @@ SistemaVendasIEFA/
     │   ├── categorias/
     │   ├── formaspagamento/
     │   ├── movimentacoes_estoque/
+    │   ├── pdv/
     │   ├── produtos/
     │   ├── relatorios/
     │   ├── usuarios/
@@ -57,11 +63,15 @@ SistemaVendasIEFA/
     │   ├── categorias/
     │   ├── formaspagamento/
     │   ├── movimentacoes_estoque/
+    │   ├── pdv/
     │   ├── produtos/
     │   ├── relatorios/
     │   ├── usuarios/
     │   └── vendas/
     └── static/
+        └── img/
+            ├── Logo_Cefa_Iefa.png
+            └── fundo_loja_cefa_iefa.png
 ```
 
 ## Configuração do ambiente
@@ -73,6 +83,8 @@ Existe Python global na máquina, mas os comandos do projeto devem usar o interp
 ```powershell
 E:\UNIVESP\SistemaVendasIEFA\backend\venv
 ```
+
+Esse ambiente virtual é local e não deve ser tratado como arquivo versionado do projeto.
 
 Para trabalhar no backend:
 
@@ -101,7 +113,7 @@ Para validar dependências importantes pelo ambiente correto:
 
 ```powershell
 .\venv\Scripts\python.exe -c "import django; print(django.get_version())"
-.\venv\Scripts\python.exe -c "import MySQLdb, barcode, PIL, dotenv; print('ok')"
+.\venv\Scripts\python.exe -c "import MySQLdb, barcode, PIL, dotenv, whitenoise; print('ok')"
 ```
 
 Não conclua que uma dependência está ausente usando o Python global; valide primeiro com `.\venv\Scripts\python.exe`.
@@ -138,6 +150,8 @@ O projeto está configurado para usar MySQL local. A configuração atual em `ba
 
 Os scripts SQL auxiliares ficam em `BD/` e devem ser considerados ao preparar ou ajustar o banco local.
 
+Além dos scripts de criação e ajustes do banco, a pasta contém carga de inventário, criação de usuário de loja e um script Python auxiliar para gerar carga de inventário.
+
 Os modelos atuais usam tabelas existentes do banco, com:
 
 - `db_table`
@@ -146,9 +160,24 @@ Os modelos atuais usam tabelas existentes do banco, com:
 
 Além disso, `settings.py` contém `MIGRATION_MODULES` desabilitando migrações para apps existentes. Portanto, mudanças estruturais de banco não devem ser tratadas como migrações Django automáticas sem análise prévia.
 
+O projeto também usa `SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'`, então a sessão de usuário é mantida em cookies assinados pelo Django.
+
+## Autenticação e acesso
+
+As rotas globais de autenticação ficam em `backend\config\urls.py`:
+
+- `login/`: exibe e processa o login.
+- `logout/`: encerra a sessão local do usuário.
+
+O controle de acesso é feito pelo middleware `apps.usuarios.middleware.UsuarioLogadoMiddleware`, que carrega `request.usuario_logado` a partir da sessão e redireciona usuários não autenticados para `login/`, preservando a URL original no parâmetro `next`.
+
+O template base exibe o usuário logado e o link de saída quando `request.usuario_logado` está disponível.
+
 ## Organização da aplicação
 
 Os módulos da aplicação ficam em `backend\apps` e são referenciados com imports no formato `apps.<nome_do_app>`.
+
+O app de PDV fica em `backend\apps\pdv` e usa o template principal `backend\templates\pdv\caixa.html`.
 
 Cada app segue, em geral, a organização Django tradicional:
 
@@ -172,9 +201,10 @@ Os módulos atuais identificados nos fontes são:
 - Produtos: listagem, criação, edição e exclusão.
 - Movimentações de estoque: listagem, criação, edição e exclusão de entradas e saídas.
 - Vendas: listagem, criação, edição e exclusão, com itens de venda via formset e busca de produto por rota JSON.
+- PDV: tela de caixa em `pdv/`, busca de produto por código, agrupamento de itens, remoção de uma unidade, cancelamento da venda em andamento, finalização por forma de pagamento e gravação da venda nas tabelas de vendas e itens.
 - Relatórios: página de relatórios, relatório de vendas por forma de pagamento e geração de etiquetas/códigos de barras para produtos.
 
-A página inicial usa um painel simples com atalhos para vendas, produtos e estoque.
+A página inicial usa um painel simples com atalhos para PDV, produtos e estoque.
 
 ## Padrões identificados
 
@@ -185,6 +215,8 @@ A página inicial usa um painel simples com atalhos para vendas, produtos e esto
 - Listagens e formulários seguem templates separados por módulo.
 - Relatórios usam formulários próprios e consultas agregadas quando necessário.
 - O app de vendas usa `inlineformset_factory` para itens de venda e JavaScript para cálculo de subtotal/total e busca de produto.
+- O app de PDV usa formulário próprio, payload JSON em campo oculto e JavaScript para operação do caixa.
+- Arquivos estáticos ficam em `backend\static`, com armazenamento configurado pelo WhiteNoise para coleta/serviço de estáticos.
 
 Antes de alterar campos, rotas ou templates, confira os fontes reais. Não assuma nomes padrão como `id` sem verificar os modelos, forms e formsets.
 
@@ -193,6 +225,7 @@ Antes de alterar campos, rotas ou templates, confira os fontes reais. Não assum
 - Este README descreve o estado atual do repositório e deve ser atualizado conforme o sistema evoluir.
 - O projeto roda localmente em Windows e depende de banco MySQL configurado na máquina.
 - Use sempre o `venv` do projeto para comandos Python/Django.
+- O `venv` em `backend\venv` é local e ignorado pelo Git.
 - O repositório usa Git/GitHub; trabalhe preferencialmente em branch dedicada.
 - Como os modelos atuais não são gerenciados pelo Django, alterações de banco devem ser planejadas junto aos scripts SQL e ao mapeamento dos modelos.
 - Existem arquivos `tests.py` nos apps, mas a validação atualmente mais direta é `manage.py check` e teste manual dos fluxos no navegador.
