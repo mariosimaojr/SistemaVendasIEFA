@@ -27,6 +27,80 @@
     .produto-select-wrapper .select2-container .select2-selection--single .select2-selection__arrow {
         height: 33px;
     }
+
+    .estoque-modal-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.72);
+        z-index: 20;
+    }
+
+    .estoque-modal-overlay.is-open {
+        display: flex;
+    }
+
+    .estoque-modal {
+        width: min(520px, calc(100vw - 40px));
+        border: 2px solid #111827;
+        background: white;
+        padding: 28px 36px;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .estoque-modal h3 {
+        margin: 0 0 24px;
+        font-size: 30px;
+        color: #4b5563;
+    }
+
+    .estoque-modal input {
+        width: 100%;
+        max-width: none;
+        margin-bottom: 20px;
+        font-size: 20px;
+    }
+
+    .estoque-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .estoque-btn-primary,
+    .estoque-btn-danger,
+    .estoque-btn-secondary {
+        display: inline-block;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .estoque-btn-primary {
+        background-color: #6d5dd3;
+    }
+
+    .estoque-btn-danger {
+        background-color: #dc3545;
+    }
+
+    .estoque-btn-secondary {
+        background-color: #6b7280;
+    }
+
+    .estoque-modal-error {
+        display: none;
+        margin-bottom: 14px;
+        color: red;
+        font-weight: bold;
+    }
 </style>
 {% endblock %}
 
@@ -89,6 +163,50 @@
     <a href="{% url 'movimentacoes_estoque:lista' %}" class="btn-cancel">Cancelar</a>
 </form>
 
+{% if produto_etiquetas %}
+    <div id="modal-imprimir-etiquetas" class="estoque-modal-overlay is-open" aria-hidden="false">
+        <div class="estoque-modal" role="dialog" aria-modal="true" aria-labelledby="modal-imprimir-titulo">
+            <h3 id="modal-imprimir-titulo">Deseja imprimir as etiquetas?</h3>
+
+            <div class="estoque-modal-actions">
+                <button type="button" id="btn-imprimir-sim" class="estoque-btn-primary">
+                    Sim
+                </button>
+                <button type="button" id="btn-imprimir-nao" class="estoque-btn-danger">
+                    Não
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-quantidade-etiquetas" class="estoque-modal-overlay" aria-hidden="true">
+        <div class="estoque-modal" role="dialog" aria-modal="true" aria-labelledby="modal-quantidade-titulo">
+            <h3 id="modal-quantidade-titulo">Quantidade de Etiquetas</h3>
+
+            <div id="quantidade-etiquetas-erro" class="estoque-modal-error">
+                Informe uma quantidade maior que zero.
+            </div>
+
+            <input
+                type="number"
+                id="quantidade-etiquetas"
+                min="1"
+                step="1"
+                value="{{ quantidade_etiquetas }}"
+            >
+
+            <div class="estoque-modal-actions">
+                <button type="button" id="btn-etiquetas-imprimir" class="estoque-btn-primary">
+                    Imprimir
+                </button>
+                <button type="button" id="btn-etiquetas-cancelar" class="estoque-btn-secondary">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
@@ -104,5 +222,68 @@
         });
     });
 </script>
+
+{% if produto_etiquetas %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const listaUrl = "{% url 'movimentacoes_estoque:lista' %}";
+        const relatorioUrl = "{% url 'relatorios:codigo_barras' %}";
+        const produtoEtiquetas = "{{ produto_etiquetas }}";
+
+        const modalImprimir = document.getElementById('modal-imprimir-etiquetas');
+        const modalQuantidade = document.getElementById('modal-quantidade-etiquetas');
+        const quantidadeInput = document.getElementById('quantidade-etiquetas');
+        const quantidadeErro = document.getElementById('quantidade-etiquetas-erro');
+
+        function abrirModalQuantidade() {
+            modalImprimir.classList.remove('is-open');
+            modalImprimir.setAttribute('aria-hidden', 'true');
+            modalQuantidade.classList.add('is-open');
+            modalQuantidade.setAttribute('aria-hidden', 'false');
+            quantidadeInput.focus();
+            quantidadeInput.select();
+        }
+
+        function voltarParaLista() {
+            window.location.href = listaUrl;
+        }
+
+        function imprimirEtiquetas() {
+            const quantidade = Number(quantidadeInput.value);
+
+            if (!Number.isInteger(quantidade) || quantidade <= 0) {
+                quantidadeErro.style.display = 'block';
+                quantidadeInput.focus();
+                quantidadeInput.select();
+                return;
+            }
+
+            const params = new URLSearchParams({
+                produto: produtoEtiquetas,
+                quantidade_etiquetas: String(quantidade),
+                auto_print: '1'
+            });
+
+            window.location.href = `${relatorioUrl}?${params.toString()}`;
+        }
+
+        document.getElementById('btn-imprimir-sim').addEventListener('click', abrirModalQuantidade);
+        document.getElementById('btn-imprimir-nao').addEventListener('click', voltarParaLista);
+        document.getElementById('btn-etiquetas-cancelar').addEventListener('click', voltarParaLista);
+        document.getElementById('btn-etiquetas-imprimir').addEventListener('click', imprimirEtiquetas);
+
+        quantidadeInput.addEventListener('input', function () {
+            quantidadeErro.style.display = 'none';
+        });
+
+        quantidadeInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                imprimirEtiquetas();
+            }
+        });
+    });
+    </script>
+{% endif %}
 
 {% endblock %}

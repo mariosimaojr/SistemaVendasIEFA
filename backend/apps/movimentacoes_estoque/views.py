@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import CharField, Q
 from django.db.models.functions import Cast
+from django.urls import reverse
 from django.utils import timezone
 
 from .models import MovimentacaoEstoque
@@ -55,6 +56,15 @@ def lista(request):
 
 def criar(request):
 
+    produto_etiquetas = request.GET.get('produto_etiquetas')
+
+    try:
+        quantidade_etiquetas = int(request.GET.get('quantidade_etiquetas') or 1)
+    except (TypeError, ValueError):
+        quantidade_etiquetas = 1
+
+    quantidade_etiquetas = max(quantidade_etiquetas, 1)
+
     if request.method == 'POST':
 
         form = MovimentacaoEstoqueForm(request.POST)
@@ -76,6 +86,17 @@ def criar(request):
 
             movimentacao.save()
 
+            if movimentacao.tipo_movimento == 'ENTRADA':
+                quantidade_etiquetas = max(quantidade, 1)
+
+                return redirect(
+                    (
+                        f"{reverse('movimentacoes_estoque:novo')}"
+                        f"?produto_etiquetas={movimentacao.produto.sequencia}"
+                        f"&quantidade_etiquetas={quantidade_etiquetas}"
+                    )
+                )
+
             return redirect('movimentacoes_estoque:lista')
 
     else:
@@ -92,7 +113,9 @@ def criar(request):
         'movimentacoes_estoque/form.html',
         {
             'form': form,
-            'titulo': 'Nova Movimentação de Estoque'
+            'titulo': 'Nova Movimentação de Estoque',
+            'produto_etiquetas': produto_etiquetas,
+            'quantidade_etiquetas': quantidade_etiquetas
         }
     )
 
