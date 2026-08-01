@@ -1,6 +1,29 @@
 <!-- templates/relatorios/vendas_forma_pagamento.html -->
 {% extends 'base.html' %}
 
+{% block style %}
+<style>
+@media print {
+    .sidebar,
+    .header,
+    form,
+    .btn-save,
+    .btn-cancel {
+        display: none !important;
+    }
+
+    .content-box {
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: white !important;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
 <h2>Relatório - Vendas por Forma de Pagamento</h2>
@@ -31,6 +54,9 @@
 
     <button type="submit" class="btn-save">Gerar Relatório</button>
     <a href="{% url 'relatorios:lista' %}" class="btn-cancel">Voltar</a>
+    <button type="button" class="btn-save" onclick="window.print();" style="margin-left: 8px;">
+        Imprimir
+    </button>
 </form>
 
 {% if data_inicial and data_final %}
