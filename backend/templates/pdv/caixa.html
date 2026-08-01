@@ -208,6 +208,23 @@
         font-size: 25px;
     }
 
+    .pdv-modal-total {
+        margin-bottom: 18px;
+        text-align: center;
+    }
+
+    .pdv-modal-total-label {
+        margin-bottom: 6px;
+        font-size: 20px;
+        color: #111827;
+    }
+
+    .pdv-modal-total-valor {
+        color: #c40000;
+        font-size: 46px;
+        line-height: 1;
+    }
+
     .pdv-payment-options {
         display: grid;
         gap: 18px;
@@ -369,7 +386,7 @@
         <div class="pdv-footer">
             <div>
                 <div class="pdv-total-label">Valor Total da Venda</div>
-                <div id="pdv-total-venda" class="pdv-total-valor">0,00</div>
+                <div id="pdv-total-venda" class="pdv-total-valor">R$ 0,00</div>
             </div>
 
             <div class="pdv-actions">
@@ -389,6 +406,11 @@
 
         <div id="pdv-modal" class="pdv-overlay" aria-hidden="true">
             <div class="pdv-modal" role="dialog" aria-modal="true" aria-labelledby="pdv-modal-titulo">
+                <div class="pdv-modal-total">
+                    <div class="pdv-modal-total-label">Valor Total da Venda</div>
+                    <div id="pdv-modal-total-venda" class="pdv-modal-total-valor">R$ 0,00</div>
+                </div>
+
                 <label id="pdv-modal-titulo">
                     Forma de Pagamento
                 </label>
@@ -441,6 +463,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const nomeProdutoInput = document.getElementById('pdv-nome-produto');
     const cupom = document.getElementById('pdv-cupom');
     const totalVenda = document.getElementById('pdv-total-venda');
+    const pdvModalTotalVenda = document.getElementById('pdv-modal-total-venda');
     const abrirFinalizacao = document.getElementById('pdv-abrir-finalizacao');
     const abrirRemocao = document.getElementById('pdv-abrir-remocao');
     const cancelarVenda = document.getElementById('pdv-cancelar-venda');
@@ -488,7 +511,8 @@ document.addEventListener('DOMContentLoaded', function () {
             vazio.className = 'pdv-cupom-vazio';
             vazio.textContent = 'CAIXA LIVRE';
             cupom.appendChild(vazio);
-            totalVenda.textContent = '0,00';
+            totalVenda.textContent = 'R$ 0,00';
+            pdvModalTotalVenda.textContent = totalVenda.textContent;
             atualizarItensJson();
             return;
         }
@@ -518,7 +542,8 @@ document.addEventListener('DOMContentLoaded', function () {
             cupom.appendChild(linha);
         });
 
-        totalVenda.textContent = formatarNumero(total);
+        totalVenda.textContent = 'R$ ' + formatarNumero(total);
+        pdvModalTotalVenda.textContent = totalVenda.textContent;
         atualizarItensJson();
         cupom.scrollTop = cupom.scrollHeight;
     }
@@ -722,6 +747,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         fecharModalRemocao();
+        pdvModalTotalVenda.textContent = totalVenda.textContent;
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
 
