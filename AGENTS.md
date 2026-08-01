@@ -97,6 +97,8 @@ Sempre sugira uma validação manual objetiva ao final quando a mudança envolve
 
 O projeto usa Git e GitHub. No Codex, trabalhe preferencialmente em branch dedicada e evite alterações diretas na branch principal.
 
+Todas as mensagens de commit devem ser escritas em português brasileiro, com resumo claro e objetivo das alterações.
+
 Antes e depois de mudanças, confira o estado do repositório quando isso ajudar a separar alterações do usuário das alterações da sessão:
 
 ```powershell
