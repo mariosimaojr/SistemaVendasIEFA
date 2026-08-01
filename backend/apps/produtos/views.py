@@ -53,6 +53,7 @@ def lista(request):
 def criar(request):
 
     produto_criado = request.GET.get('produto_criado')
+    quantidade_etiquetas = request.GET.get('quantidade_etiquetas') or 1
 
     if request.method == 'POST':
 
@@ -64,6 +65,7 @@ def criar(request):
         if form.is_valid():
 
             estoque_inicial = form.cleaned_data['estoque_inicial']
+            quantidade_etiquetas = max(estoque_inicial, 1)
 
             with transaction.atomic():
 
@@ -82,7 +84,11 @@ def criar(request):
                     )
 
             return redirect(
-                f"{reverse('produtos:novo')}?produto_criado={produto.sequencia}"
+                (
+                    f"{reverse('produtos:novo')}"
+                    f"?produto_criado={produto.sequencia}"
+                    f"&quantidade_etiquetas={quantidade_etiquetas}"
+                )
             )
 
     else:
@@ -97,7 +103,8 @@ def criar(request):
         {
             'form': form,
             'titulo': 'Novo Produto',
-            'produto_criado': produto_criado
+            'produto_criado': produto_criado,
+            'quantidade_etiquetas': quantidade_etiquetas
         }
     )
 
