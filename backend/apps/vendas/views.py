@@ -8,6 +8,7 @@ from django.utils import timezone
 from apps.produtos.models import Produto
 from .forms import VendaForm, criar_venda_item_formset
 from .models import Venda
+from .services import registrar_baixa_estoque_venda_item
 
 
 def lista(request):
@@ -61,6 +62,10 @@ def criar(request):
                 item.subtotal = item.quantidade * item.preco_unitario
                 total += item.subtotal
                 item.save()
+                registrar_baixa_estoque_venda_item(
+                    item,
+                    request.usuario_logado
+                )
 
             venda.valor_total = total
             venda.save()

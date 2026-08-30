@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from apps.produtos.models import Produto
 from apps.vendas.models import Venda, VendaItem
+from apps.vendas.services import registrar_baixa_estoque_venda_item
 
 from .forms import PdvVendaForm
 
@@ -130,12 +131,16 @@ def _salvar_venda_pdv(form, itens, produtos, usuario_logado):
         preco_unitario = produto.preco_venda
         subtotal = preco_unitario * quantidade
 
-        VendaItem.objects.create(
+        item = VendaItem.objects.create(
             venda=venda,
             produto=produto,
             quantidade=quantidade,
             preco_unitario=preco_unitario,
             subtotal=subtotal
+        )
+        registrar_baixa_estoque_venda_item(
+            item,
+            usuario_logado
         )
 
         valor_total += subtotal
