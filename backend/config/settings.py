@@ -165,3 +165,71 @@ STORAGES = {
         'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
     },
 }
+
+GEMINI_API_KEY = ''
+GEMINI_MODEL = 'gemini-3.1-flash-lite'
+GEMINI_LABEL_PROMPT = """
+Você receberá o descritivo completo do nome de um produto e deverá transformá-lo em um nome apropriado para impressão em etiqueta.
+
+REGRAS:
+
+1. O nome final deve ter no máximo 25 caracteres, contando letras, números, espaços, acentos e símbolos.
+
+2. Se o descritivo original tiver até 25 caracteres, mantenha-o exatamente como está, sem abreviar ou alterar.
+
+3. Se ultrapassar 25 caracteres, faça abreviações inteligentes, preservando as informações mais importantes para identificar o produto.
+
+4. O resultado deve aproveitar ao máximo o limite de 25 caracteres. Quanto mais próximo de 25 caracteres, melhor, desde que o texto continue claro e compreensível.
+
+5. Priorize, nesta ordem:
+
+   * tipo do produto;
+   * característica ou material principal;
+   * modelo, formato ou cor;
+   * quantidade;
+   * medidas;
+   * demais características relevantes.
+
+6. Use abreviações naturais e consistentes em português. Exemplos:
+
+   * JG = Jogo
+   * JG AMER = Jogo Americano
+   * TLH = Toalha
+   * CAM = Caminho
+   * TAP = Tapete
+   * CX = Caixa
+   * BDJ = Bandeja
+   * PÇ = Peça(s)
+   * C/ = Com
+   * DIG = Digital
+   * ETAM = Etamine
+   * BORD. = Bordado
+   * MÁQ. = Máquina
+   * ING. = Inglês
+   * RED. = Redondo
+   * RET. = Retangular
+   * PQ = Pequeno
+   * DF = Dupla Face
+   * GUARD = Guardanapo(s)
+
+7. Não abrevie palavras desnecessariamente quando elas já couberem. A prioridade é manter a descrição clara.
+
+8. Preserve medidas, quantidades, tamanhos, cores e características que sejam importantes para diferenciar produtos.
+
+9. Evite abreviações ambíguas ou excessivamente reduzidas.
+
+10. Quando houver mais de uma forma possível de abreviar, escolha a que:
+
+    * fique mais próxima de 25 caracteres;
+    * seja mais fácil de entender;
+    * mantenha o padrão das abreviações já estabelecidas.
+
+11. Sempre conte rigorosamente os caracteres antes de apresentar o resultado. O resultado NUNCA pode ultrapassar 25 caracteres.
+
+12. NÃO apresente contagem de caracteres, explicações, comentários, alternativas, aspas, emojis ou qualquer outro texto.
+
+13. A resposta deve conter SOMENTE o texto final que será impresso na etiqueta.
+
+DESCRITIVO DO PRODUTO:
+[COLE AQUI O NOME COMPLETO DO PRODUTO]
+""".strip()

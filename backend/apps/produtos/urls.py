@@ -18,6 +18,12 @@ urlpatterns = [
     ),
 
     path(
+        'sugerir-nome-etiqueta/',
+        views.sugerir_nome_etiqueta,
+        name='sugerir_nome_etiqueta'
+    ),
+
+    path(
         'editar/<int:pk>/',
         views.editar,
         name='editar'

@@ -75,6 +75,83 @@
         color: red;
         font-weight: bold;
     }
+
+    .produto-nome-linha {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 500px;
+    }
+
+    .produto-nome-linha input {
+        flex: 1;
+        max-width: none;
+    }
+
+    .produto-ia-button {
+        width: 38px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #7c3aed;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #7c3aed;
+        cursor: pointer;
+    }
+
+    .produto-ia-button:hover {
+        background: #f5f3ff;
+    }
+
+    .produto-ia-button:disabled {
+        cursor: wait;
+        opacity: 0.65;
+    }
+
+    .produto-ia-icon {
+        display: inline-flex;
+    }
+
+    .produto-ia-spinner {
+        width: 16px;
+        height: 16px;
+        display: none;
+        border: 2px solid #ddd6fe;
+        border-top-color: #7c3aed;
+        border-radius: 50%;
+        animation: produto-ia-girar 0.8s linear infinite;
+    }
+
+    .produto-ia-button.is-loading .produto-ia-icon {
+        display: none;
+    }
+
+    .produto-ia-button.is-loading .produto-ia-spinner {
+        display: inline-block;
+    }
+
+    @keyframes produto-ia-girar {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .produto-ia-mensagem {
+        display: none;
+        margin-top: 6px;
+        font-size: 13px;
+        color: #4b5563;
+    }
+
+    .produto-ia-mensagem.is-error {
+        color: #b91c1c;
+    }
+
+    .produto-ia-mensagem.is-success {
+        color: #166534;
+    }
 </style>
 {% endblock %}
 
@@ -92,18 +169,47 @@
     {% endif %}
 
     <p>
-        Nome:<br>
-        {{ form.nome }}
-        {% if form.nome.errors %}
-            <br><span style="color:red;">{{ form.nome.errors }}</span>
+        Descrição (completa):<br>
+        {{ form.descricao }}
+        {% if form.descricao.errors %}
+            <br><span style="color:red;">{{ form.descricao.errors }}</span>
         {% endif %}
     </p>
 
     <p>
-        Descrição:<br>
-        {{ form.descricao }}
-        {% if form.descricao.errors %}
-            <br><span style="color:red;">{{ form.descricao.errors }}</span>
+        Nome (etiqueta):<br>
+        <span class="produto-nome-linha">
+            {{ form.nome }}
+            <button
+                type="button"
+                id="btn-sugerir-nome-etiqueta"
+                class="produto-ia-button"
+                title="Sugerir nome com IA"
+                aria-label="Sugerir nome com IA"
+            >
+                <span class="produto-ia-icon">
+                    <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M9.9 2.8 8.7 7.2 4.3 8.4l4.4 1.2 1.2 4.4 1.2-4.4 4.4-1.2-4.4-1.2-1.2-4.4Z"></path>
+                        <path d="m18.5 12.5-.8 2.8-2.8.8 2.8.8.8 2.8.8-2.8 2.8-.8-2.8-.8-.8-2.8Z"></path>
+                        <path d="m5 16-.5 1.8-1.8.5 1.8.5L5 20.6l.5-1.8 1.8-.5-1.8-.5L5 16Z"></path>
+                    </svg>
+                </span>
+                <span class="produto-ia-spinner" aria-hidden="true"></span>
+            </button>
+        </span>
+        <span id="nome-etiqueta-ia-mensagem" class="produto-ia-mensagem"></span>
+        {% if form.nome.errors %}
+            <br><span style="color:red;">{{ form.nome.errors }}</span>
         {% endif %}
     </p>
 
@@ -144,6 +250,83 @@
     <button type="submit" class="btn-save">Salvar</button>
     <a href="{% url 'produtos:lista' %}" class="btn-cancel">Cancelar</a>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const nomeInput = document.getElementById('id_nome');
+    const descricaoInput = document.getElementById('id_descricao');
+    const botaoIa = document.getElementById('btn-sugerir-nome-etiqueta');
+    const mensagemIa = document.getElementById('nome-etiqueta-ia-mensagem');
+    const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    const sugerirUrl = "{% url 'produtos:sugerir_nome_etiqueta' %}";
+
+    function mostrarMensagem(texto, tipo) {
+        mensagemIa.textContent = texto;
+        mensagemIa.className = 'produto-ia-mensagem';
+
+        if (tipo) {
+            mensagemIa.classList.add(tipo);
+        }
+
+        mensagemIa.style.display = 'block';
+    }
+
+    function limparMensagem() {
+        mensagemIa.textContent = '';
+        mensagemIa.className = 'produto-ia-mensagem';
+        mensagemIa.style.display = 'none';
+    }
+
+    async function sugerirNomeEtiqueta() {
+        const descricao = descricaoInput.value.trim();
+
+        if (!descricao) {
+            mostrarMensagem('Informe a descrição do produto antes de usar a IA.', 'is-error');
+            descricaoInput.focus();
+            return;
+        }
+
+        botaoIa.disabled = true;
+        botaoIa.classList.add('is-loading');
+        botaoIa.setAttribute('aria-busy', 'true');
+        mostrarMensagem('Gerando sugestão...', '');
+
+        try {
+            const response = await fetch(sugerirUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfInput.value
+                },
+                body: JSON.stringify({
+                    descricao: descricao
+                })
+            });
+
+            const data = await response.json().catch(function () {
+                return {};
+            });
+
+            if (!response.ok) {
+                throw new Error(data.erro || 'Não foi possível gerar a sugestão.');
+            }
+
+            nomeInput.value = data.nome;
+            nomeInput.focus();
+            mostrarMensagem('Sugestão aplicada.', 'is-success');
+        } catch (error) {
+            mostrarMensagem(error.message || 'Não foi possível gerar a sugestão.', 'is-error');
+        } finally {
+            botaoIa.disabled = false;
+            botaoIa.classList.remove('is-loading');
+            botaoIa.removeAttribute('aria-busy');
+        }
+    }
+
+    botaoIa.addEventListener('click', sugerirNomeEtiqueta);
+    descricaoInput.addEventListener('input', limparMensagem);
+});
+</script>
 
 {% if produto_criado %}
     <div id="modal-imprimir-etiquetas" class="produto-modal-overlay is-open" aria-hidden="false">

@@ -23,6 +23,8 @@ class ProdutoForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
+        self.fields['nome'].widget.attrs['maxlength'] = '25'
+
         if not self.is_create:
             self.fields.pop('estoque_inicial', None)
 
@@ -37,7 +39,7 @@ class ProdutoForm(forms.ModelForm):
         ]
 
         labels = {
-            'nome': 'Nome',
+            'nome': 'Nome (etiqueta)',
             'descricao': 'Descrição',
             'categoria': 'Categoria',
             'preco_venda': 'Preço de Venda',

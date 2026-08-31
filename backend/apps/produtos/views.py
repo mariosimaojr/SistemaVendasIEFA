@@ -1,14 +1,58 @@
+import json
+import re
+import urllib.error
+import urllib.request
+
+from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.db.models import CharField, Q, Sum
 from django.db.models.functions import Cast, Coalesce
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from apps.movimentacoes_estoque.models import MovimentacaoEstoque
 
 from .models import Produto
 from .forms import ProdutoForm
+
+
+def _montar_prompt_nome_etiqueta(descricao):
+
+    placeholder = '[COLE AQUI O NOME COMPLETO DO PRODUTO]'
+    prompt_base = settings.GEMINI_LABEL_PROMPT
+
+    if placeholder in prompt_base:
+        return prompt_base.replace(placeholder, descricao)
+
+    return f'{prompt_base}\n{descricao}'
+
+
+def _limpar_nome_etiqueta(nome):
+
+    nome = re.sub(r'\s+', ' ', nome).strip()
+    nome = nome.strip('"\'“”‘’')
+
+    return nome[:25]
+
+
+def _extrair_texto_gemini(dados):
+
+    candidatos = dados.get('candidates') or []
+
+    if not candidatos:
+        return ''
+
+    partes = candidatos[0].get('content', {}).get('parts') or []
+    textos = [
+        parte.get('text', '')
+        for parte in partes
+        if parte.get('text')
+    ]
+
+    return ' '.join(textos)
 
 
 def lista(request):
@@ -48,6 +92,103 @@ def lista(request):
             'q': q
         }
     )
+
+
+@require_POST
+def sugerir_nome_etiqueta(request):
+
+    if not settings.GEMINI_API_KEY:
+        return JsonResponse(
+            {'erro': 'A chave da API Gemini não foi configurada.'},
+            status=503
+        )
+
+    try:
+        dados = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {'erro': 'Requisição inválida.'},
+            status=400
+        )
+
+    descricao = (dados.get('descricao') or '').strip()
+
+    if not descricao:
+        return JsonResponse(
+            {'erro': 'Informe a descrição do produto antes de usar a IA.'},
+            status=400
+        )
+
+    modelo = settings.GEMINI_MODEL.strip()
+    modelo_path = modelo if modelo.startswith('models/') else f'models/{modelo}'
+    url = f'https://generativelanguage.googleapis.com/v1beta/{modelo_path}:generateContent'
+
+    payload = {
+        'contents': [
+            {
+                'role': 'user',
+                'parts': [
+                    {
+                        'text': _montar_prompt_nome_etiqueta(descricao)
+                    }
+                ]
+            }
+        ],
+        'generationConfig': {
+            'temperature': 0.2,
+            'maxOutputTokens': 32
+        }
+    }
+
+    requisicao = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode('utf-8'),
+        headers={
+            'Content-Type': 'application/json',
+            'x-goog-api-key': settings.GEMINI_API_KEY
+        },
+        method='POST'
+    )
+
+    try:
+        with urllib.request.urlopen(requisicao, timeout=30) as resposta:
+            resposta_json = resposta.read().decode('utf-8')
+    except urllib.error.HTTPError as erro:
+        mensagem = 'Não foi possível gerar a sugestão com a IA.'
+
+        try:
+            erro_json = json.loads(erro.read().decode('utf-8'))
+            mensagem = erro_json.get('error', {}).get('message') or mensagem
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            pass
+
+        return JsonResponse(
+            {'erro': mensagem},
+            status=502
+        )
+    except (TimeoutError, urllib.error.URLError):
+        return JsonResponse(
+            {'erro': 'A API Gemini não respondeu. Tente novamente.'},
+            status=504
+        )
+
+    try:
+        dados_resposta = json.loads(resposta_json)
+    except json.JSONDecodeError:
+        return JsonResponse(
+            {'erro': 'A API Gemini retornou uma resposta inválida.'},
+            status=502
+        )
+
+    nome = _limpar_nome_etiqueta(_extrair_texto_gemini(dados_resposta))
+
+    if not nome:
+        return JsonResponse(
+            {'erro': 'A API Gemini não retornou uma sugestão.'},
+            status=502
+        )
+
+    return JsonResponse({'nome': nome})
 
 
 def criar(request):
