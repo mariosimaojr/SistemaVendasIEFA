@@ -9,6 +9,7 @@ class VendaForm(forms.ModelForm):
     data_venda = forms.DateField(
         label='Data da Venda',
         widget=forms.DateInput(
+            format='%Y-%m-%d',
             attrs={
                 'class': 'form-control',
                 'type': 'date'
