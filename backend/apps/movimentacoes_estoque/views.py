@@ -24,7 +24,7 @@ def lista(request):
             'produto__sequencia',
             output_field=CharField()
         )
-    ).order_by('-sequencia')
+    ).order_by('-data_movimento', '-sequencia')
 
     if q:
         filtros = (

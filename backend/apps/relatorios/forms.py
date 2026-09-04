@@ -19,6 +19,7 @@ class RelatorioVendasFormaPagamentoForm(forms.Form):
     data_inicial = forms.DateField(
         label='Data Inicial',
         widget=forms.DateInput(
+            format='%Y-%m-%d',
             attrs={
                 'class': 'form-control',
                 'type': 'date'
@@ -29,6 +30,7 @@ class RelatorioVendasFormaPagamentoForm(forms.Form):
     data_final = forms.DateField(
         label='Data Final',
         widget=forms.DateInput(
+            format='%Y-%m-%d',
             attrs={
                 'class': 'form-control',
                 'type': 'date'
