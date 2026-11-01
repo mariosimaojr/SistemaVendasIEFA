@@ -63,6 +63,31 @@
     <h3>Período: {{ data_inicial|date:"d/m/Y" }} até {{ data_final|date:"d/m/Y" }}</h3>
 {% endif %}
 
+{% if resumo_periodo %}
+    <h3>Resumo do período</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Forma Pagamento</th>
+                <th>Valor Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in resumo_periodo %}
+            <tr>
+                <td>{{ item.forma_pagamento }}</td>
+                <td>R$ {{ item.valor_total }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <th>TOTAL GERAL</th>
+                <th>R$ {{ total_periodo }}</th>
+            </tr>
+        </tbody>
+    </table>
+{% endif %}
+
 {% for bloco in relatorio %}
 
     <hr>

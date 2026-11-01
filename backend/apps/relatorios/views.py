@@ -31,6 +31,8 @@ def vendas_forma_pagamento(request):
     form = RelatorioVendasFormaPagamentoForm(request.GET or None)
 
     relatorio = []
+    resumo_periodo = []
+    total_periodo = Decimal('0.00')
     data_inicial = None
     data_final = None
 
@@ -69,6 +71,8 @@ def vendas_forma_pagamento(request):
             }
         )
 
+        totais_por_forma = defaultdict(lambda: Decimal('0.00'))
+
         for item in resumo_queryset:
 
             data_ref = item['data_venda']
@@ -81,6 +85,15 @@ def vendas_forma_pagamento(request):
             })
 
             agrupado[data_ref]['total_geral'] += valor_total
+
+            if data_final > data_inicial:
+                totais_por_forma[forma] += valor_total
+                total_periodo += valor_total
+
+        resumo_periodo = [
+            {'forma_pagamento': forma, 'valor_total': valor}
+            for forma, valor in sorted(totais_por_forma.items())
+        ]
 
         for item in produtos_queryset:
 
@@ -109,6 +122,8 @@ def vendas_forma_pagamento(request):
         {
             'form': form,
             'relatorio': relatorio,
+            'resumo_periodo': resumo_periodo,
+            'total_periodo': total_periodo,
             'data_inicial': data_inicial,
             'data_final': data_final,
         }
