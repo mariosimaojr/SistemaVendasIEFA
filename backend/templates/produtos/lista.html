@@ -9,12 +9,13 @@
         Novo Produto
     </a>
 
-    <form method="get" style="display: flex; align-items: center; gap: 10px; margin: 0;">
+    <form method="get" autocomplete="off" style="display: flex; align-items: center; gap: 10px; margin: 0;">
         <label for="q">Pesquisa</label>
         <input
             type="text"
             id="q"
             name="q"
+            autocomplete="off"
             value="{{ q }}"
             placeholder="Código, produto, descrição ou categoria"
             style="width: 350px;"
