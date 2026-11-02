@@ -244,7 +244,7 @@ def criar(request):
         {
             'form': form,
             'titulo': 'Novo Produto',
-            'produto_criado': produto_criado,
+            'produto_etiquetas': produto_criado,
             'quantidade_etiquetas': quantidade_etiquetas
         }
     )
@@ -266,12 +266,20 @@ def editar(request, pk):
 
         if form.is_valid():
 
+            preco_alterado = 'preco_venda' in form.changed_data
+
             produto = form.save(commit=False)
 
             if not produto.data_cadastro:
                 produto.data_cadastro = timezone.now()
 
             produto.save()
+
+            if preco_alterado:
+                return redirect(
+                    f"{reverse('produtos:editar', args=[produto.sequencia])}"
+                    '?preco_alterado=1'
+                )
 
             return redirect('produtos:lista')
 
@@ -286,7 +294,13 @@ def editar(request, pk):
         'produtos/form.html',
         {
             'form': form,
-            'titulo': 'Editar Produto'
+            'titulo': 'Editar Produto',
+            'produto_etiquetas': (
+                produto.sequencia
+                if request.method == 'GET' and request.GET.get('preco_alterado') == '1'
+                else None
+            ),
+            'quantidade_etiquetas': 1
         }
     )
 

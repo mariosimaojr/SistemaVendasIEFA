@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-{% if produto_criado %}
+{% if produto_etiquetas %}
     <div id="modal-imprimir-etiquetas" class="produto-modal-overlay is-open" aria-hidden="false">
         <div class="produto-modal" role="dialog" aria-modal="true" aria-labelledby="modal-imprimir-titulo">
             <h3 id="modal-imprimir-titulo">Deseja imprimir as etiquetas?</h3>
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('DOMContentLoaded', function () {
         const listaUrl = "{% url 'produtos:lista' %}";
         const relatorioUrl = "{% url 'relatorios:codigo_barras' %}";
-        const produtoCriado = "{{ produto_criado }}";
+        const produtoEtiquetas = "{{ produto_etiquetas }}";
 
         const modalImprimir = document.getElementById('modal-imprimir-etiquetas');
         const modalQuantidade = document.getElementById('modal-quantidade-etiquetas');
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const params = new URLSearchParams({
-                produto: produtoCriado,
+                produto: produtoEtiquetas,
                 quantidade_etiquetas: String(quantidade),
                 auto_print: '1'
             });
